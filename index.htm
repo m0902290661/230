@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>高一智</title>
     <link rel="icon" type="png" href="logo.png">
     <style>
-        #what{
+        #what {
             display: none;
         }
-        #what:target{
+
+        #what:target {
             display: block;
             position: fixed;
             border-radius: 15px;
@@ -20,9 +22,10 @@
         }
     </style>
 </head>
+
 <body style="background-color: aliceblue;padding: 5px;">
 
-    <div id="what" >
+    <div id="what">
         <a style="margin-left: 65%;" href="">&times;</a>
         <p>未來這個雲端硬碟會儲存我們在高一上的所有檔案。就是未來以後學習歷程檔案來做準備的</p>
     </div>
@@ -40,22 +43,26 @@
         <h2>登記Gmail地址以加入學習歷程檔案雲端硬碟</h2>
         <form id="gmailRegisterForm">
             <input type="text" id="userGmail" name="使用者Gmail地址" placeholder="請使用GO帳號" required>
-            <button type="submit">登記</button>
+            <button type="submit" onclick="limt()">登記</button>
         </form>
         <p id="join_out"></p>
+        <p style="color: red;">請不要重複登記！每台設備限制次數1次</p>
+        <p>若你看不到登記欄位，代表你已被鎖定請輸入pin來解鎖<input type="password" id="unlock"><button onclick="unlock()">unlock!</button></p>
         <a href="#what">這是幹嘛的？</a>
     </div>
-    
+
     <div>
         <h2 style="text-align: center;">．．更多內容敬請期待．．</h2>
     </div>
-    
+
     <div>
         <p style="text-align: center;">&copy;高一智 <a href="code.txt">原始碼</a> by Hsu Yuanwei</p>
     </div>
 
     <script src="表單.js"></script>
+    <script src="限制.js"></script>
 </body>
+
 </html>
 
 <!-- 請勿未經允許使用原始碼 -->
