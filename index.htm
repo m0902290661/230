@@ -7,19 +7,6 @@
     <title>高一智</title>
     <link rel="icon" type="png" href="logo.png">
     <style>
-        #what {
-            display: none;
-        }
-
-        #what:target {
-            display: block;
-            position: fixed;
-            border-radius: 15px;
-            width: 50%;
-            margin-left: 25%;
-            margin-top: 15px;
-            background-color: wheat;
-        }
         a{
             display: block;
             margin-bottom: 15px;
@@ -33,14 +20,13 @@
 </head>
 
 <body>
-
-    <div id="what">
-        <a style="margin-left: 65%;" href="">&times;</a>
-        <p>未來這個雲端硬碟會儲存我們在高一上的所有檔案。就是未來以後學習歷程檔案來做準備的</p>
+    <div style="display: block; text-align: center;background-color:aliceblue;border-radius: 15px;">
+        <p style="font-size: 24px;"><b>本網站正在更新</b></p>
+        <p>若有功能無法正常使用屬正常現象</p>
     </div>
 
     <div>
-        <h1 style="text-align: center;">高一智</h1>
+        <h1 style="text-align: center;"><img src="logo.png" alt="logo" style="height: 24px;">高一智</h1>
         <img style="height: 0px;cursor: pointer;" src="header.png">
     </div>
 
@@ -51,7 +37,7 @@
             <button type="submit" onclick="limt()">登記</button>
         </form>
         <p id="join_out"></p>
-        <a href="#what">這是幹嘛的？</a>
+        <a onclick="alert('未來這個雲端硬碟會儲存我們在高一上的所有檔案。就是未來以後學習歷程檔案來做準備的')">這是幹嘛的？</a>
         <a href="https://drive.google.com/drive/folders/1l7hrZyXuTcaywCCqOtI5B-mBNfO9xMkO?usp=sharing">進入此雲端</a>
         <p>（請登記gmail，否則你不是成員）</p>
     </div>
