@@ -20,25 +20,30 @@
             margin-top: 15px;
             background-color: wheat;
         }
+        a{
+            display: block;
+            margin-bottom: 15px;
+            text-decoration: none;
+            color: black;
+        }
+        a:hover{
+            text-decoration: underline;
+        }
     </style>
 </head>
 
-<body style="background-color: aliceblue;padding: 5px;">
+<body>
 
     <div id="what">
         <a style="margin-left: 65%;" href="">&times;</a>
         <p>未來這個雲端硬碟會儲存我們在高一上的所有檔案。就是未來以後學習歷程檔案來做準備的</p>
     </div>
 
-    <div style="margin-bottom: 100px;">
-        <h1 style="text-align: center;">高一智</h1>
-        <img style="height: 100px;cursor: pointer;" src="header.png">
-    </div>
     <div>
-        <h2>開學前置作業</h2>
-        <p>1. 加入學習歷程檔案雲端硬碟（114-1高一智）</p>
-        <p>2. 開學物品準備</p>
+        <h1 style="text-align: center;">高一智</h1>
+        <img style="height: 0px;cursor: pointer;" src="header.png">
     </div>
+
     <div id="join">
         <h2>登記Gmail地址以加入學習歷程檔案雲端硬碟</h2>
         <form id="gmailRegisterForm">
@@ -46,21 +51,25 @@
             <button type="submit" onclick="limt()">登記</button>
         </form>
         <p id="join_out"></p>
-        <p style="color: red;">請不要重複登記！每台設備限制次數1次</p>
-        <p>若你看不到登記欄位，代表你已被鎖定請輸入pin來解鎖<input type="password" id="unlock"><button onclick="unlock()">unlock!</button></p>
         <a href="#what">這是幹嘛的？</a>
+        <a href="https://drive.google.com/drive/folders/1l7hrZyXuTcaywCCqOtI5B-mBNfO9xMkO?usp=sharing">進入此雲端</a>
+        <p>（請登記gmail，否則你不是成員）</p>
+    </div>
+
+    <div class="ifm">
+        <h2>學習資源</h2>
+        <h3>英文</h3>
+        <a href="https://english.cool/dative-verbs/">授與動詞（授予動詞）是什麼？有哪些？（含例句）＿英文庫</a>
+        <a href="https://english.cool/sense-verbs/">英文「感官動詞」有哪些？來搞懂 hear、feel、see 等用法！ ＿英文庫</a>
+        <a href="https://www.ehanlin.com.tw/app/keyword/%E5%9C%8B%E4%B8%AD/%E8%8B%B1%E8%AA%9E/%E4%BD%BF%E5%BD%B9%E5%8B%95%E8%A9%9E.html">國中英語 - 使役動詞 ＿翰林雲端學院</a>
+        <a href="https://happyfish.blog/keep-o-oc/">find,leave,keep +O+OC 以豐富例句用法大解密|寫作必備！ ＿高效英語速學網</a>
     </div>
 
     <div>
-        <h2 style="text-align: center;">．．更多內容敬請期待．．</h2>
-    </div>
-
-    <div>
-        <p style="text-align: center;">&copy;高一智 <a href="code.txt">原始碼</a> by Hsu Yuanwei</p>
+        <p style="text-align: center;">&copy;高一智 by Hsu Yuanwei</p>
     </div>
 
     <script src="表單.js"></script>
-    <script src="限制.js"></script>
 </body>
 
 </html>
