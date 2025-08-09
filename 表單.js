@@ -45,7 +45,6 @@ const form = document.getElementById('gmailRegisterForm');
     .then(result => {
       joinOut.className = 'success';
       joinOut.textContent = result; // 顯示 GAS 返回的訊息
-      location.href='https://drive.google.com/drive/folders/1l7hrZyXuTcaywCCqOtI5B-mBNfO9xMkO';
       form.reset(); // 成功後清空表單
     })
     .catch(error => {
