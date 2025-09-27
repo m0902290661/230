@@ -5,64 +5,165 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>高一智</title>
-    <link rel="icon" type="png" href="logo.png">
     <style>
-        a{
-            display: block;
-            margin-bottom: 15px;
+        .header {
+            background-color: rgb(66, 64, 64);
+            color: white;
+        }
+
+        .menu {
+            background-color: rgb(208, 208, 208);
+            margin-top: 5px;
+            display: flex;
+            justify-content: center;
+            height: 300px;
+        }
+
+        .menu a {
             text-decoration: none;
             color: black;
+            display: block;
+        }
+
+        .menu img {
+            height: 150px;
+            border-radius: 15px;
+        }
+
+        .menu_a {
+            border-radius: 15px;
+            text-align: center;
+            margin: 35px;
             cursor: pointer;
         }
-        a:hover{
-            text-decoration: underline;
+
+        .menu_a:hover {
+            box-shadow: 5px 5px;
         }
-        summary:hover{
-            cursor: pointer;
-            text-decoration: underline;
+
+        .footer {
+            text-align: center;
+        }
+
+        @media (max-width:768px) {
+            .menu{
+                max-width: 100%;
+                overflow: scroll;
+            }
         }
     </style>
 </head>
 
 <body>
-    <div style="display: none; text-align: center;background-color:aliceblue;border-radius: 15px;">
-        <p style="font-size: 24px;"><b>本網站正在更新</b></p>
-        <p>若有功能無法正常使用屬正常現象</p>
+    <div class="header">
+        <img src="logo.png" style="height: 28px;margin-right: 15px;margin-left: 15px;">
+        <h1 style="display: inline;">高一智</h1>
     </div>
 
-    <div style="text-align: center;">
-        <h1><img src="logo.png" alt="logo" style="height: 24px;"> 高一智</h1>
-        <a target="_blank" href="https://students-in-233.blogspot.com">班導網站</a>
-        <a target="_blank" href="https://script.google.com/macros/s/AKfycbzaWet7du1Qy7NDCCqY7Bq9itZBkt14bpVrflia-tD7kwmrdDAyhf4xL6SPF-9S3i3e/exec">成績查詢系統</a>
-        <a target="_blank" href="https://drive.google.com/drive/folders/1l7hrZyXuTcaywCCqOtI5B-mBNfO9xMkO?usp=sharing">進入學習歷程檔案雲端</a>
-        <a href="https://portal.k12.ntut.edu.tw" target="_blank">校務系統</a>
-        <img style="height: 0px;cursor: pointer;" src="header.png">
+    <div class="menu">
+        <div class="menu_a" onclick="location.href='https://students-in-233.blogspot.com'">
+            <img src="ht.png" alt="">
+            <a target="_blank" href="https://students-in-233.blogspot.com">班導網站</a>
+        </div>
+        <div class="menu_a"
+            onclick="location.href='https://script.google.com/macros/s/AKfycbzaWet7du1Qy7NDCCqY7Bq9itZBkt14bpVrflia-tD7kwmrdDAyhf4xL6SPF-9S3i3e/exec'">
+            <img src="成績查詢.png" alt="">
+            <a target="_blank"
+                href="https://script.google.com/macros/s/AKfycbzaWet7du1Qy7NDCCqY7Bq9itZBkt14bpVrflia-tD7kwmrdDAyhf4xL6SPF-9S3i3e/exec">成績查詢系統</a>
+        </div>
+        <div class="menu_a"
+            onclick="location.href='https://drive.google.com/drive/folders/1l7hrZyXuTcaywCCqOtI5B-mBNfO9xMkO?usp=sharing'">
+            <img src="歷程雲端.png" alt="">
+            <a target="_blank"
+                href="https://drive.google.com/drive/folders/1l7hrZyXuTcaywCCqOtI5B-mBNfO9xMkO?usp=sharing">學習歷程檔案雲端</a>
+        </div>
+        <div class="menu_a" onclick="location.href='https://portal.k12.ntut.edu.tw'">
+            <img src="校務.png" alt="">
+            <a target="_blank" href="https://portal.k12.ntut.edu.tw">校務系統</a>
+        </div>
     </div>
 
+    <div class="main">
+        <div>
+            <h2>公告內容</h2>
+            <table border="1" cellspacing="0" cellpadding="8">
+                <tr>
+                    <th>日期</th>
+                    <th>標題</th>
+                    <th>內容</th>
+                </tr>
+                <tr>
+                    <td>2025/09/27</td>
+                    <td>本學期行事曆</td>
+                    <td><a href="114-1行事曆(校外版)２.pdf" target="_blank">查看行事曆</a></td>
+                </tr>
+            </table>
+        </div>
+        <div>
+            <h2>學習資源</h2>
+            <table border="1" style="width:100%; text-align:left; border-collapse:collapse;">
+                <thead>
+                    <tr>
+                        <th>科目</th>
+                        <th>資源連結</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>英文</td>
+                        <td>
+                            <ul>
+                                <li><a target="_blank"
+                                        href="https://english.cool/dative-verbs/">授與動詞（授予動詞）是什麼？有哪些？（含例句）＿英文庫</a></li>
+                                <li><a target="_blank" href="https://english.cool/sense-verbs/">英文「感官動詞」有哪些？來搞懂
+                                        hear、feel、see 等用法！＿英文庫</a></li>
+                                <li><a target="_blank"
+                                        href="https://www.ehanlin.com.tw/app/keyword/%E5%9C%8B%E4%B8%AD/%E8%8B%B1%E8%AA%9E/%E4%BD%BF%E5%BD%B9%E5%8B%95%E8%A9%9E.html">國中英語
+                                        - 使役動詞＿翰林雲端學院</a></li>
+                                <li><a target="_blank" href="https://happyfish.blog/keep-o-oc/">find,leave,keep +O+OC
+                                        以豐富例句用法大解密|寫作必備！＿高效英語速學網</a></li>
+                                <li><a target="_blank"
+                                        href="https://www.sunlightenglish.com/article_detail/sense-verbs">感官動詞有哪些？一個口訣馬上學會感官動詞＿日光英文</a>
+                                </li>
+                                <li><a target="_blank"
+                                        href="https://barshai.org/thoughts/linking-verbs/">連綴動詞有哪些？常見連綴動詞的用法解析＿barshai</a>
+                                </li>
+                                <li><a target="_blank" href="https://blog.english4u.net/blog2.aspx?id=1240">English4U 博客
+                                        1240 篇章</a></li>
+                                <li><a target="_blank"
+                                        href="https://engeasylearn.blogspot.com/2016/05/as-soon-as-upon.html">As Soon As
+                                        / Upon 解析</a></li>
+                                <li><a target="_blank"
+                                        href="https://rosetoeic.tw/toeic/toeic-grammar/past-perfect-contrast">TOEIC Past
+                                        Perfect 對比講解</a></li>
+                                <li><a target="_blank" href="https://blog.english4u.net/blog2.aspx?id=501">English4U 博客
+                                        501 篇章</a></li>
+                                <li><a target="_blank" href="https://nativecamp.net/zh-tw/blog/5958/">NativeCamp
+                                        英語學習文章</a></li>
 
-    <div class="ifm">
-        <h2>公告</h2>
-        <a href="114-1行事曆(校外版)２.pdf">114-1行事曆(校外版)２.pdf</a>
-        <h2>學習資源</h2>
-        <h3>英文</h3>
-        <a target="_blank" href="https://english.cool/dative-verbs/">授與動詞（授予動詞）是什麼？有哪些？（含例句）＿英文庫</a>
-        <a target="_blank" href="https://english.cool/sense-verbs/">英文「感官動詞」有哪些？來搞懂 hear、feel、see 等用法！ ＿英文庫</a>
-        <a target="_blank" href="https://www.ehanlin.com.tw/app/keyword/%E5%9C%8B%E4%B8%AD/%E8%8B%B1%E8%AA%9E/%E4%BD%BF%E5%BD%B9%E5%8B%95%E8%A9%9E.html">國中英語 - 使役動詞 ＿翰林雲端學院</a>
-        <a target="_blank" href="https://happyfish.blog/keep-o-oc/">find,leave,keep +O+OC 以豐富例句用法大解密|寫作必備！ ＿高效英語速學網</a>
-        <a href="https://www.sunlightenglish.com/article_detail/sense-verbs" target="_blank">感官動詞有哪些？一個口訣馬上學會感官動詞 ＿日光英文</a>
-        <a href="https://barshai.org/thoughts/linking-verbs/" target="_blank">連綴動詞有哪些？常見連綴動詞的用法解析 ＿barshai</a>
-        <h3>探究實作</h3>
-        <a href="實驗報告格式.docx">實驗報告格式（下載）</a>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>探究實作</td>
+                        <td>
+                            <ul>
+                                <li><a href="實驗報告格式.docx">實驗報告格式（下載）</a></li>
+                            </ul>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <div style="text-align: center;">
-        <p>&copy;高一智 by Hsu Yuanwei</p>
+    <div class="footer">
+        <p>&copy;高一智</p>
         <p>網頁瀏覽次數</p>
-        <a target="_blank" href="https://cn.web-counter.net" title="计数器"><img src="https://www.web-counter.net/count_20091204.php?c=0hp5lhTvzo7" style="border:0;padding:0;margin:0;" alt="计数器"></a>
+        <a target="_blank" href="https://cn.web-counter.net" title="计数器"><img
+                src="https://www.web-counter.net/count_20091204.php?c=0hp5lhTvzo7" style="border:0;padding:0;margin:0;"
+                alt="计数器"></a>
     </div>
-    <script src="表單.js"></script>
 </body>
 
 </html>
-
-<!-- 請勿未經允許使用原始碼 -->
