@@ -69,9 +69,11 @@
             text-decoration: none;
             color: black;
         }
-        .menu2_0{
+
+        .menu2_0 {
             background-color: rgb(208, 208, 208);
         }
+
         .menu2_0a {
             text-decoration: none;
             color: white;
@@ -81,18 +83,20 @@
             cursor: pointer;
         }
 
-        .menu2_0{
+        .menu2_0 {
             display: none;
         }
-        
+
 
         @media (max-width:768px) {
-            .menu{
+            .menu {
                 display: none;
             }
-            .menu2_0{
+
+            .menu2_0 {
                 display: block;
             }
+
             .t1 {
                 width: 150px;
             }
@@ -134,7 +138,8 @@
             </div>
         </div>
         <div style="text-align: right;">
-            <p><a onclick="menu('-')" class="menu2_0a">〈</a><span style="margin: 5px;" id="menuout">1/4</span><a onclick="menu('+')" class="menu2_0a">〉</a></p>
+            <p><a onclick="menu('-')" class="menu2_0a">〈</a><span style="margin: 5px;" id="menuout">1/4</span><a
+                    onclick="menu('+')" class="menu2_0a">〉</a></p>
         </div>
     </div>
     <div class="menu" id="menu1">
@@ -243,6 +248,18 @@
                                         用法</a></li>
                                 <li><a href="https://blog.english4u.net/blog2.aspx?id=346" target="_blank">English4U
                                         教學文章（346）</a></li>
+                                <li><a href="https://blog.english4u.net/blog2.aspx?id=126" target="_blank">English4U
+                                        英文學習網誌 (ID 126)</a></li>
+                                <li><a href="https://blog.english4u.net/blog2.aspx?id=333" target="_blank">English4U
+                                        英文學習網誌 (ID 333)</a></li>
+                                <li><a href="https://blog.english4u.net/blog2.aspx?id=899" target="_blank">English4U
+                                        英文學習網誌 (ID 899)</a></li>
+                                <li><a href="https://engoo.com.tw/blog/英文寫作秘訣/grammar_used_to_be_used_to/"
+                                        target="_blank">Engoo 英文寫作秘訣：used to / be used to 文法教學</a></li>
+                                <li><a href="https://ivybar.com.tw/article/613" target="_blank">Ivy Bar 常春藤文章 (No.
+                                        613)</a></li>
+                                <li><a href="https://blog.english4u.net/blog2.aspx?id=227" target="_blank">English4U
+                                        英文學習網誌 (ID 227)</a></li>
                             </ul>
                         </td>
                     </tr>
@@ -270,45 +287,45 @@
 
     <script>
         menu_s();
-        function menu_clear(){
-            document.getElementById('m2_1').style.display='none';
-            document.getElementById('m2_2').style.display='none';
-            document.getElementById('m2_3').style.display='none';
-            document.getElementById('m2_4').style.display='none';
+        function menu_clear() {
+            document.getElementById('m2_1').style.display = 'none';
+            document.getElementById('m2_2').style.display = 'none';
+            document.getElementById('m2_3').style.display = 'none';
+            document.getElementById('m2_4').style.display = 'none';
         }
-        function menu_s(){
-            document.getElementById('m2_2').style.display='none';
-            document.getElementById('m2_3').style.display='none';
-            document.getElementById('m2_4').style.display='none';
+        function menu_s() {
+            document.getElementById('m2_2').style.display = 'none';
+            document.getElementById('m2_3').style.display = 'none';
+            document.getElementById('m2_4').style.display = 'none';
         }
         let nowi = 1;
-        function menu(i){
-            if(i==='+'){
+        function menu(i) {
+            if (i === '+') {
                 nowi++;
-                if(nowi>4){
-                    nowi=1;
+                if (nowi > 4) {
+                    nowi = 1;
                     menu_clear();
-                    document.getElementById('m2_1').style.display='block';
-                    document.getElementById('menuout').innerHTML=String(nowi+'/4');
+                    document.getElementById('m2_1').style.display = 'block';
+                    document.getElementById('menuout').innerHTML = String(nowi + '/4');
                     return;
                 }
                 menu_clear();
-                document.getElementById('m2_'+String(nowi)).style.display='block';
-                document.getElementById('menuout').innerHTML=String(nowi+'/4');
-                return;   
-            }else if(i==='-'){
+                document.getElementById('m2_' + String(nowi)).style.display = 'block';
+                document.getElementById('menuout').innerHTML = String(nowi + '/4');
+                return;
+            } else if (i === '-') {
                 nowi--;
-                if(nowi<1){
-                    nowi=4;
+                if (nowi < 1) {
+                    nowi = 4;
                     menu_clear();
-                    document.getElementById('m2_4').style.display='block';
-                    document.getElementById('menuout').innerHTML=String(nowi+'/4');
+                    document.getElementById('m2_4').style.display = 'block';
+                    document.getElementById('menuout').innerHTML = String(nowi + '/4');
                     return;
                 }
                 menu_clear();
-                document.getElementById('m2_'+String(nowi)).style.display='block';
-                document.getElementById('menuout').innerHTML=String(nowi+'/4');
-                return; 
+                document.getElementById('m2_' + String(nowi)).style.display = 'block';
+                document.getElementById('menuout').innerHTML = String(nowi + '/4');
+                return;
             }
         }
     </script>
