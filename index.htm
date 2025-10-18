@@ -46,7 +46,57 @@
             text-align: center;
         }
 
+        .t1 {
+            width: 300px;
+            height: 150px;
+            border: 0;
+        }
+
+        .menu2 {
+            display: flex;
+            background-color: rgb(208, 208, 208);
+            justify-content: center;
+            margin-top: 5px;
+        }
+
+        .menu2 img {
+            height: 150px;
+            border-radius: 15px;
+        }
+
+        .menu2 a {
+            display: block;
+            text-decoration: none;
+            color: black;
+        }
+        .menu2_0{
+            background-color: rgb(208, 208, 208);
+        }
+        .menu2_0a {
+            text-decoration: none;
+            color: white;
+            background-color: black;
+            border-radius: 5px;
+            padding: 5px;
+            cursor: pointer;
+        }
+
+        .menu2_0{
+            display: none;
+        }
+        
+
         @media (max-width:768px) {
+            .menu{
+                display: none;
+            }
+            .menu2_0{
+                display: block;
+            }
+            .t1 {
+                width: 150px;
+            }
+
             .menu {
                 max-width: 100%;
                 overflow: scroll;
@@ -60,8 +110,34 @@
         <img src="logo.png" style="height: 28px;margin-right: 15px;margin-left: 15px;">
         <h1 style="display: inline;">高一智</h1>
     </div>
-
-    <div class="menu">
+    <div class="menu2_0">
+        <div class="menu2" id="menu2">
+            <div id="m2_1" class="menu_a" onclick="location.href='https://students-in-233.blogspot.com'">
+                <img src="ht.png" alt="">
+                <a target="_blank" href="https://students-in-233.blogspot.com">班導網站</a>
+            </div>
+            <div id="m2_2" class="menu_a"
+                onclick="location.href='https://script.google.com/macros/s/AKfycbzaWet7du1Qy7NDCCqY7Bq9itZBkt14bpVrflia-tD7kwmrdDAyhf4xL6SPF-9S3i3e/exec'">
+                <img src="成績查詢.png" alt="">
+                <a target="_blank"
+                    href="https://script.google.com/macros/s/AKfycbzaWet7du1Qy7NDCCqY7Bq9itZBkt14bpVrflia-tD7kwmrdDAyhf4xL6SPF-9S3i3e/exec">成績查詢系統</a>
+            </div>
+            <div id="m2_3" class="menu_a"
+                onclick="location.href='https://drive.google.com/drive/folders/1l7hrZyXuTcaywCCqOtI5B-mBNfO9xMkO?usp=sharing'">
+                <img src="歷程雲端.png" alt="">
+                <a target="_blank"
+                    href="https://drive.google.com/drive/folders/1l7hrZyXuTcaywCCqOtI5B-mBNfO9xMkO?usp=sharing">學習歷程檔案雲端</a>
+            </div>
+            <div id="m2_4" class="menu_a" onclick="location.href='https://portal.k12.ntut.edu.tw'">
+                <img src="校務.png" alt="">
+                <a target="_blank" href="https://portal.k12.ntut.edu.tw">校務系統</a>
+            </div>
+        </div>
+        <div style="text-align: right;">
+            <p><a onclick="menu('-')" class="menu2_0a">〈</a><span style="margin: 5px;" id="menuout">1/4</span><a onclick="menu('+')" class="menu2_0a">〉</a></p>
+        </div>
+    </div>
+    <div class="menu" id="menu1">
         <div class="menu_a" onclick="location.href='https://students-in-233.blogspot.com'">
             <img src="ht.png" alt="">
             <a target="_blank" href="https://students-in-233.blogspot.com">班導網站</a>
@@ -92,6 +168,22 @@
                     <th>日期</th>
                     <th>標題</th>
                     <th>內容</th>
+                </tr>
+                <tr>
+                    <td>2025/10/18</td>
+                    <td>本土問答</td>
+                    <td>
+                        <textarea name="" id="" class="t1">一、辛棄疾一生想要收復山河，但無數次抱負無法施展。你曾努力過卻沒被肯定，那種失落你是怎麼消化的？你會選擇放棄，還是換一種方式繼續前行？是什麼能讓你在無力感裡，仍然告訴自己「我還想再試一次」？
+為什麼？(請舉出個人的實際例子)
+
+
+
+二、元宵燈火萬家歡樂，卻有一個人靜靜站在角落。你是否也曾在眾人歡笑時，在熱鬧的人群中，感到格格不入？感到孤單？那一刻你怎麼看待自己？你選擇迎合，還是選擇堅持做自己？，當大家都在追逐某種潮流時，你是否曾選擇一條與眾不同卻忠於自己的路？為什麼？(請舉出個人的實際例子)
+
+
+三、蔣捷說「少年聽雨歌樓上，壯年聽雨客舟中，而今聽雨僧廬下」，人生階段不同，心情也不同。請舉出這兩三年當中，面對親情、友情、感情、課業、人生、生涯規劃等等，隨著年齡增長而有過不同的領悟與體會
+</textarea>
+                    </td>
                 </tr>
                 <tr>
                     <td>2025/09/27</td>
@@ -174,6 +266,52 @@
                 src="https://www.web-counter.net/count_20091204.php?c=0hp5lhTvzo7" style="border:0;padding:0;margin:0;"
                 alt="计数器"></a>
     </div>
+
+
+    <script>
+        menu_s();
+        function menu_clear(){
+            document.getElementById('m2_1').style.display='none';
+            document.getElementById('m2_2').style.display='none';
+            document.getElementById('m2_3').style.display='none';
+            document.getElementById('m2_4').style.display='none';
+        }
+        function menu_s(){
+            document.getElementById('m2_2').style.display='none';
+            document.getElementById('m2_3').style.display='none';
+            document.getElementById('m2_4').style.display='none';
+        }
+        let nowi = 1;
+        function menu(i){
+            if(i==='+'){
+                nowi++;
+                if(nowi>4){
+                    nowi=1;
+                    menu_clear();
+                    document.getElementById('m2_1').style.display='block';
+                    document.getElementById('menuout').innerHTML=String(nowi+'/4');
+                    return;
+                }
+                menu_clear();
+                document.getElementById('m2_'+String(nowi)).style.display='block';
+                document.getElementById('menuout').innerHTML=String(nowi+'/4');
+                return;   
+            }else if(i==='-'){
+                nowi--;
+                if(nowi<1){
+                    nowi=4;
+                    menu_clear();
+                    document.getElementById('m2_4').style.display='block';
+                    document.getElementById('menuout').innerHTML=String(nowi+'/4');
+                    return;
+                }
+                menu_clear();
+                document.getElementById('m2_'+String(nowi)).style.display='block';
+                document.getElementById('menuout').innerHTML=String(nowi+'/4');
+                return; 
+            }
+        }
+    </script>
 </body>
 
 </html>
