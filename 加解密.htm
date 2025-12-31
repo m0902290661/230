@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>遠端資料儲存系統</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 500px; margin: 40px auto; padding: 20px; background: #f4f7f6; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        h2 { color: #333; margin-top: 0; }
+        input { width: calc(100% - 22px); padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
+        button { width: 100%; padding: 10px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        button:hover { background: #45a049; }
+        button:disabled { background: #ccc; }
+        #output { padding: 15px; border-radius: 5px; display: none; word-break: break-all; }
+        .success { background: #e8f5e9; color: #2e7d32; display: block !important; }
+        .error { background: #ffebee; color: #c62828; display: block !important; }
+        #in,#ot{ display: none;}
+    </style>
+</head>
+<body>
+    <div class="card" id="m">
+        <h1>加解密系統</h1>
+        <h2>輸入密碼</h2>
+        <input type="password" id="ps">
+        <button onclick="login()">登入</button>
+    </div>
+
+    <div class="card" id="in">
+        <h2>加密</h2>
+        <input type="text" id="userInput" placeholder="輸入內容...">
+        <button id="saveBtn" onclick="sendToGAS('save')">加密</button>
+    </div>
+
+    <div class="card" id="ot">
+        <h2>解密</h2>
+        <input type="text" id="searchId" placeholder="輸入 6 位 ID (例如: A7B9X2)">
+        <button id="getBtn" onclick="sendToGAS('get')">解密</button>
+    </div>
+
+    <div id="output"></div>
+
+    <script>
+        function login(){
+            if(document.getElementById('ps').value==='990607'){
+                document.getElementById('m').style.display='none';
+                document.getElementById('in').style.display='block';
+                document.getElementById('ot').style.display='block';
+            }
+            else{
+                output.className = 'error';
+                output.innerText = '認證失敗';
+            }
+        }
+
+
+        // 重要：請替換成你部署後的 GAS 網頁應用程式網址
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbwV3V3AmeoSmSlV3V-lHvNJnCzmCRlDixu9QUwlkjzDRVxjfFVo6QSb1__IE4E5wJk/exec';
+
+        async function sendToGAS(action) {
+            const output = document.getElementById('output');
+            const saveBtn = document.getElementById('saveBtn');
+            const getBtn = document.getElementById('getBtn');
+            
+            let payload = { action: action };
+
+            if (action === 'save') {
+                const content = document.getElementById('userInput').value;
+                if (!content) return alert('請輸入內容');
+                payload.content = content;
+            } else {
+                const id = document.getElementById('searchId').value.toUpperCase();
+                if (!id) return alert('請輸入 ID');
+                payload.id = id;
+            }
+
+            // 鎖定按鈕避免重複點擊
+            saveBtn.disabled = true;
+            getBtn.disabled = true;
+            output.className = '';
+            output.innerText = '處理中...';
+            output.style.display = 'block';
+
+            try {
+                const response = await fetch(GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    output.className = 'success';
+                    if (action === 'save') {
+                        output.innerHTML = `儲存成功！<br>您的專屬 ID 為：<strong>${result.id}</strong>`;
+                    } else {
+                        output.innerHTML = `找到資料：<br><strong>${result.content}</strong><br><small>時間：${result.time}</small>`;
+                    }
+                } else {
+                    output.className = 'error';
+                    output.innerText = '錯誤：' + result.message;
+                }
+            } catch (error) {
+                output.className = 'error';
+                output.innerText = '連線失敗，請檢查 GAS 網址與權限設置。';
+            } finally {
+                saveBtn.disabled = false;
+                getBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
