@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>！新版本！ ｜ 高一智</title>
+    <style>
+        body {
+            background-color: black;
+            display: flex;
+            /* 啟動 Flex 模式 */
+            justify-content: center;
+            /* 水平置中 (主軸) */
+            align-items: center;
+            /* 垂直置中 (交叉軸) */
+            height: 100vh;
+            /* 設定高度，否則垂直置中看不出效果 */
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 15px;
+            width: 70vh;
+            padding: 15px;
+        }
+
+        a {
+            text-decoration: none;
+            color: black;
+            margin: 5px;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        img {
+            height: 150px;
+        }
+
+        #c1,
+        #c2 {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div id="c1">
+            <h1>發現新版本！！</h1>
+            <p>我們發現您在班網版本v1.0第一次使用班網</p>
+            <h2>更新項目</h2>
+            <div style="border: 1px solid;">
+                <ul>
+                    <li>選單系統</li>
+                    <li>測試按鈕（開發功能）</li>
+                    <li>特殊節日區塊（跨年煙火功能）</li>
+                </ul>
+            </div>
+        </div>
+        <div id="c2">
+            <h2>選單系統</h2>
+            <img src="teach/截圖 2025-12-31 晚上7.50.10.png" alt="">
+            <p>按下選單按鈕</p>
+            <img src="teach/截圖 2025-12-31 晚上7.51.14.png" alt="">
+            <p>即可隨意選取</p>
+        </div>
+        <a href="index.htm">跳過教學</a> <a onclick="nc()">下一頁</a>
+    </div>
+
+    <script>
+        let cp = 1; // 假設從第 1 個區塊開始
+
+        function nc() {
+            // 1. 隱藏目前的區塊 (c1)
+            let currentElement = document.getElementById('c' + cp);
+            if (currentElement !== null) {
+                currentElement.style.display = 'none';
+            }
+
+            // 2. 增加索引值
+            cp++;
+
+            // 3. 顯示下一個區塊 (c2)
+            let nextElement = document.getElementById('c' + cp);
+            if (nextElement !== null) {
+                nextElement.style.display = 'block';
+                // 額外功能：紀錄進度到本地儲存
+                localStorage.setItem('lastStep', cp);
+            } else {
+                location.href='index.htm';
+            }
+        }
+
+        window.onload = function () {
+
+            // 初始化顯示
+            document.getElementById('c' + cp).style.display = 'block';
+        };
+    </script>
+</body>
+
+</html>

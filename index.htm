@@ -349,11 +349,35 @@
         <a target="_blank" href="https://cn.web-counter.net" title="计数器"><img
                 src="https://www.web-counter.net/count_20091204.php?c=0hp5lhTvzo7" style="border:0;padding:0;margin:0;"
                 alt="计数器"></a>
+        <button onclick="test()">test</button>
     </div>
 
     <script src="跨年.js"></script>
     <script>
-        menu_s();
+        function cu(){
+            let ver = '1.0';
+            let userver = localStorage.getItem('userver');
+            if(ver!==userver){
+                localStorage.setItem('userver', ver);
+                location.href='teach.htm';
+                return;
+            }
+            return;
+        }
+
+        function test(){
+            let i =0;
+            i = prompt('1.重置用戶版本資訊')
+            if(i==='1'){
+                localStorage.removeItem('userver');
+            }
+        }
+
+        window.onload = function(){
+            menu_s();
+            cu();
+        }
+
         function menu_clear() {
             document.getElementById('m2_1').style.display = 'none';
             document.getElementById('m2_2').style.display = 'none';
