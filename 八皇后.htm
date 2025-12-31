@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>八皇后遊戲 ｜ 高一智</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; background: #f0f0f0; }
+        #chessboard { display: grid; grid-template-columns: repeat(8, 50px); grid-template-rows: repeat(8, 50px); border: 5px solid #333; }
+        .cell { width: 50px; height: 50px; display: flex; justify-content: center; align-items: center; font-size: 30px; cursor: pointer; }
+        .white { background-color: #eeeed2; }
+        .black { background-color: #769656; }
+        .queen { color: #000; text-shadow: 0 0 5px #fff; }
+        .invalid { background-color: #ff6b6b !important; }
+        #status { margin-top: 20px; font-weight: bold; height: 24px; }
+        button { margin-top: 10px; padding: 10px 20px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <h1>八皇后遊戲 <a href="index.htm" style="font-size: 14px;">返回班網</a></h1>
+    <div id="chessboard"></div>
+    <div id="status">請放置 8 個皇后</div>
+    <button onclick="resetGame()">重新開始</button>
+
+    <script>
+        const boardSize = 8;
+        const boardElement = document.getElementById('chessboard');
+        const statusElement = document.getElementById('status');
+        let queens = []; // 存儲皇后的座標 [row, col]
+
+        function createBoard() {
+            boardElement.innerHTML = '';
+            for (let r = 0; r < boardSize; r++) {
+                for (let c = 0; c < boardSize; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = `cell ${(r + c) % 2 === 0 ? 'white' : 'black'}`;
+                    cell.dataset.row = r;
+                    cell.dataset.col = c;
+                    cell.onclick = () => toggleQueen(r, c);
+                    boardElement.appendChild(cell);
+                }
+            }
+        }
+
+        function toggleQueen(r, c) {
+            const index = queens.findIndex(q => q[0] === r && q[1] === c);
+            if (index !== -1) {
+                queens.splice(index, 1);
+            } else {
+                if (queens.length < 8) queens.push([r, c]);
+            }
+            render();
+            checkLogic();
+        }
+
+        function render() {
+            const cells = document.querySelectorAll('.cell');
+            cells.forEach(cell => {
+                const r = parseInt(cell.dataset.row);
+                const c = parseInt(cell.dataset.col);
+                const hasQueen = queens.some(q => q[0] === r && q[1] === c);
+                cell.innerHTML = hasQueen ? '♛' : '';
+                cell.classList.remove('invalid');
+            });
+        }
+
+        function checkLogic() {
+            let conflicts = new Set();
+            for (let i = 0; i < queens.length; i++) {
+                for (let j = i + 1; j < queens.length; j++) {
+                    const [r1, c1] = queens[i];
+                    const [r2, c2] = queens[j];
+                    
+                    // 檢查行、列、對角線
+                    if (r1 === r2 || c1 === c2 || Math.abs(r1 - r2) === Math.abs(c1 - c2)) {
+                        conflicts.add(i);
+                        conflicts.add(j);
+                    }
+                }
+            }
+
+            const cells = document.querySelectorAll('.cell');
+            conflicts.forEach(index => {
+                const [r, c] = queens[index];
+                const cell = [...cells].find(el => el.dataset.row == r && el.dataset.col == c);
+                cell.classList.add('invalid');
+            });
+
+            if (conflicts.size === 0 && queens.length === 8) {
+                statusElement.innerText = "恭喜！成功解決八皇后問題！";
+                statusElement.style.color = "green";
+            } else if (conflicts.size > 0) {
+                statusElement.innerText = "發生衝突了！";
+                statusElement.style.color = "red";
+            } else {
+                statusElement.innerText = `已放置 ${queens.length} 個皇后`;
+                statusElement.style.color = "black";
+            }
+        }
+
+        function resetGame() {
+            queens = [];
+            statusElement.innerText = "請放置 8 個皇后";
+            statusElement.style.color = "black";
+            render();
+        }
+
+        createBoard();
+    </script>
+</body>
+</html>

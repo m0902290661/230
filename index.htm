@@ -10,6 +10,8 @@
         .header {
             background-color: rgb(66, 64, 64);
             color: white;
+            display: flex;
+            justify-content: space-around;
         }
 
         .menu {
@@ -88,8 +90,20 @@
         }
 
         .adv {
-            background-color: rgb(255, 124, 9);
+            color: white;
             padding-left: 15px;
+            background-image: url('https://img95.699pic.com/photo/40152/0342.gif_wh300.gif');
+        }
+
+        .main {
+            background-color: white;
+        }
+
+        .h_m a {
+            display: block;
+            text-decoration: none;
+            color: white;
+            cursor: pointer;
         }
 
         @media (max-width:768px) {
@@ -115,8 +129,15 @@
 
 <body>
     <div class="header">
-        <img src="logo.png" style="height: 28px;margin-right: 15px;margin-left: 15px;">
-        <h1 style="display: inline;">高一智</h1>
+        <div style="flex: 1;">
+            <h1><img src="logo.png" style="height: 28px;margin-right: 15px;margin-left: 15px;">高一智</h1>
+        </div>
+        <details style="margin-right: 10%;margin-top: 25px;background-color: rgb(66, 64, 64);">
+            <summary style="cursor: pointer;">選單</summary>
+            <div class="h_m">
+                <a href="八皇后.htm">八皇后遊戲</a>
+            </div>
+        </details>
     </div>
     <div class="adv">
         <p>特殊節日區塊</p>
@@ -185,7 +206,7 @@
                 <tr>
                     <td>2025/12/28</td>
                     <td>文學講座作文打字須知</td>
-                    <td>要特別提醒部分同學要記得寄信給邱老師。另外，也要提醒全班的同學，每一個人都要將作文打成文字檔上傳班級的雲端硬碟，這也是學習歷程檔案的一部分。格式，信件主旨：班級  作文題目；內文才是作文內容喔
+                    <td>要特別提醒部分同學要記得寄信給邱老師。另外，也要提醒全班的同學，每一個人都要將作文打成文字檔上傳班級的雲端硬碟，這也是學習歷程檔案的一部分。格式，信件主旨：班級 作文題目；內文才是作文內容喔
                         <br><span style="color: red;">*</span>附上邱老師gmail:ac061@hmhs.ntct.edu.tw
                     </td>
                 </tr>
