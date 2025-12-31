@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <title>井字棋遊戲 (一字棋)</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #f7f7f7;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 5px;
+            background-color: #333;
+            border: 5px solid #333;
+        }
+
+        .cell {
+            width: 100px;
+            height: 100px;
+            background-color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .cell.taken {
+            cursor: not-allowed;
+        }
+
+        .status {
+            margin: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        .winner {
+            color: #e74c3c;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>一字棋 (井字棋) <a href="index.htm" style="font-size: 14px;">返回班網</a></h1>
+    <div class="status" id="status">輪到玩家：O</div>
+    <div class="board" id="board"></div>
+    <br>
+    <button onclick="resetGame()">重新開始</button>
+
+    <script>
+        const boardElement = document.getElementById('board');
+        const statusElement = document.getElementById('status');
+        let currentPlayer = 'O'; // 玩家
+        let aiPlayer = 'X';      // 電腦
+        let gameState = ["", "", "", "", "", "", "", "", ""];
+        let gameActive = true;
+
+        const winningConditions = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],
+            [0, 4, 8], [2, 4, 6]
+        ];
+
+        function createBoard() {
+            boardElement.innerHTML = '';
+            gameState.forEach((cell, index) => {
+                const cellElement = document.createElement('div');
+                cellElement.classList.add('cell');
+                cellElement.dataset.index = index;
+                cellElement.innerText = cell;
+                cellElement.onclick = () => handleCellClick(index);
+                boardElement.appendChild(cellElement);
+            });
+        }
+
+        // 玩家點擊
+        function handleCellClick(index) {
+            if (gameState[index] !== "" || !gameActive || currentPlayer === aiPlayer) return;
+
+            makeMove(index, currentPlayer);
+
+            if (gameActive) {
+                statusElement.innerText = "電腦思考中...";
+                setTimeout(() => aiMove(), 500); // 延遲半秒讓體驗更真實
+            }
+        }
+
+        function makeMove(index, player) {
+            gameState[index] = player;
+            render();
+            if (checkWinner(gameState, player)) {
+                statusElement.innerHTML = `玩家 <span class="winner">${player}</span> 獲勝！`;
+                gameActive = false;
+                return;
+            }
+            if (!gameState.includes("")) {
+                statusElement.innerText = "平手！";
+                gameActive = false;
+                return;
+            }
+            currentPlayer = (player === 'O') ? 'X' : 'O';
+        }
+
+        // 電腦回合 (Minimax)
+        function aiMove() {
+            let bestScore = -Infinity;
+            let move;
+            for (let i = 0; i < 9; i++) {
+                if (gameState[i] === "") {
+                    gameState[i] = aiPlayer;
+                    let score = minimax(gameState, 0, false);
+                    gameState[i] = "";
+                    if (score > bestScore) {
+                        bestScore = score;
+                        move = i;
+                    }
+                }
+            }
+            makeMove(move, aiPlayer);
+            if (gameActive) statusElement.innerText = "輪到你了：O";
+        }
+
+        // Minimax 核心邏輯
+        function minimax(board, depth, isMaximizing) {
+            if (checkWinner(board, aiPlayer)) return 10 - depth;
+            if (checkWinner(board, 'O')) return depth - 10;
+            if (!board.includes("")) return 0;
+
+            if (isMaximizing) {
+                let bestScore = -Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (board[i] === "") {
+                        board[i] = aiPlayer;
+                        let score = minimax(board, depth + 1, false);
+                        board[i] = "";
+                        bestScore = Math.max(score, bestScore);
+                    }
+                }
+                return bestScore;
+            } else {
+                let bestScore = Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (board[i] === "") {
+                        board[i] = 'O';
+                        let score = minimax(board, depth + 1, true);
+                        board[i] = "";
+                        bestScore = Math.min(score, bestScore);
+                    }
+                }
+                return bestScore;
+            }
+        }
+
+        function checkWinner(board, player) {
+            return winningConditions.some(condition => {
+                return condition.every(index => board[index] === player);
+            });
+        }
+
+        function render() {
+            const cells = document.querySelectorAll('.cell');
+            gameState.forEach((val, i) => {
+                cells[i].innerText = val;
+                if (val !== "") cells[i].classList.add('taken');
+            });
+        }
+
+        function resetGame() {
+            currentPlayer = 'O';
+            gameState = ["", "", "", "", "", "", "", "", ""];
+            gameActive = true;
+            statusElement.innerText = "輪到你了：O";
+            createBoard();
+        }
+
+        createBoard();
+    </script>
+</body>
+
+</html>
