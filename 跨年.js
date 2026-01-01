@@ -5,7 +5,7 @@ function updateCountdown() {
   const now = new Date();
   
   // 2. 計算毫秒差（需移除 diff = 0）
-  const diff = targetTime - now;
+  const diff = 0;
 
   // 3. 如果時間到了
   if (diff <= 0) {
