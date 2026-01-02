@@ -1,201 +1,349 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
     <meta charset="UTF-8">
     <title>2048 進階 AI 優化版</title>
     <style>
-        body { background: #faf8ef; font-family: "Clear Sans", sans-serif; display: flex; flex-direction: column; align-items: center; }
-        #game-container { width: 400px; margin-top: 20px; }
-        .header { display: flex; justify-content: space-between; align-items: center; width: 100%; }
-        #score-container { background: #bbada0; padding: 10px 20px; color: white; border-radius: 3px; font-weight: bold; }
-        #grid { background: #bbada0; width: 400px; height: 400px; border-radius: 6px; position: relative; padding: 15px; box-sizing: border-box; }
-        .cell { width: 80px; height: 80px; background: rgba(238, 228, 218, 0.35); border-radius: 3px; float: left; margin: 5px; line-height: 80px; text-align: center; font-size: 35px; font-weight: bold; color: #776e65; transition: all 0.1s ease; }
-        .n-2 { background: #eee4da; } .n-4 { background: #ede0c8; } .n-8 { background: #f2b179; color: white; }
-        .n-16 { background: #f59563; color: white; } .n-32 { background: #f67c5f; color: white; }
-        .n-64 { background: #f65e3b; color: white; } .n-128 { background: #edcf72; color: white; font-size: 30px; }
-        .n-256 { background: #edcc61; color: white; font-size: 30px; } .n-512 { background: #edc850; color: white; font-size: 30px; }
-        .n-1024 { background: #edc53f; color: white; font-size: 25px; } .n-2048 { background: #edc22e; color: white; font-size: 25px; }
-        .controls { margin-top: 20px; display: flex; gap: 10px; }
-        button { padding: 10px 20px; font-size: 16px; cursor: pointer; background: #8f7a66; color: white; border: none; border-radius: 3px; flex: 1; }
-        button:hover { background: #7f6a56; }
-        .ai-status { margin-top: 10px; color: #776e65; font-weight: bold; text-align: center; }
+        body {
+            background: #faf8ef;
+            font-family: "Clear Sans", sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #game-container {
+            width: 400px;
+            margin-top: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        #score-container {
+            background: #bbada0;
+            padding: 10px 20px;
+            color: white;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        #grid {
+            background: #bbada0;
+            width: 400px;
+            height: 400px;
+            border-radius: 6px;
+            position: relative;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        .cell {
+            width: 80px;
+            height: 80px;
+            background: rgba(238, 228, 218, 0.35);
+            border-radius: 3px;
+            float: left;
+            margin: 5px;
+            line-height: 80px;
+            text-align: center;
+            font-size: 35px;
+            font-weight: bold;
+            color: #776e65;
+            transition: all 0.1s ease;
+        }
+
+        .n-2 {
+            background: #eee4da;
+        }
+
+        .n-4 {
+            background: #ede0c8;
+        }
+
+        .n-8 {
+            background: #f2b179;
+            color: white;
+        }
+
+        .n-16 {
+            background: #f59563;
+            color: white;
+        }
+
+        .n-32 {
+            background: #f67c5f;
+            color: white;
+        }
+
+        .n-64 {
+            background: #f65e3b;
+            color: white;
+        }
+
+        .n-128 {
+            background: #edcf72;
+            color: white;
+            font-size: 30px;
+        }
+
+        .n-256 {
+            background: #edcc61;
+            color: white;
+            font-size: 30px;
+        }
+
+        .n-512 {
+            background: #edc850;
+            color: white;
+            font-size: 30px;
+        }
+
+        .n-1024 {
+            background: #edc53f;
+            color: white;
+            font-size: 25px;
+        }
+
+        .n-2048 {
+            background: #edc22e;
+            color: white;
+            font-size: 25px;
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background: #8f7a66;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            flex: 1;
+        }
+
+        button:hover {
+            background: #7f6a56;
+        }
+
+        .ai-status {
+            margin-top: 10px;
+            color: #776e65;
+            font-weight: bold;
+            text-align: center;
+        }
     </style>
 </head>
+
 <body>
 
-<div id="game-container">
-    <div class="header">
-        <h1>2048 AI+</h1>
-        <div id="score-container">分數: <span id="score">0</span></div>
+    <div id="game-container">
+        <div class="header">
+            <h1>2048 AI+</h1>
+            <div id="score-container">分數: <span id="score">0</span></div>
+        </div>
+
+        <div id="grid"></div>
+
+        <div class="controls">
+            <button onclick="initGame()">重新開始</button>
+            <button id="ai-btn" onclick="toggleAI()">開啟 AI 優化模式</button>
+        </div>
+        <div class="ai-status" id="status">模式：手動操作 (方向鍵)</div>
     </div>
-    
-    <div id="grid"></div>
 
-    <div class="controls">
-        <button onclick="initGame()">重新開始</button>
-        <button id="ai-btn" onclick="toggleAI()">開啟 AI 優化模式</button>
-    </div>
-    <div class="ai-status" id="status">模式：手動操作 (方向鍵)</div>
-</div>
+    <script>
+        let board = [];
+        let score = 0;
+        let isAI = false;
+        let aiInterval = null;
 
-<script>
-    let board = [];
-    let score = 0;
-    let isAI = false;
-    let aiInterval = null;
+        // 更強大的蛇形權重矩陣
+        const WEIGHT_MAP = [
+            [10, 8, 7, 6],
+            [1, 2, 3, 4],
+            [0.5, 0.3, 0.2, 0.1],
+            [0.01, 0.005, 0.002, 0.001]
+        ].map(row => row.map(v => Math.pow(4, v))); // 使用指數級增加權重差距
 
-    // AI 權重地圖：蛇形排列，導向右下角
-    const WEIGHT_MAP = [
-        [2, 4, 8, 16],
-        [256, 128, 64, 32],
-        [512, 1024, 2048, 4096],
-        [65536, 32768, 16384, 8192]
-    ];
-
-    function initGame() {
-        board = Array(4).fill().map(() => Array(4).fill(0));
-        score = 0;
-        addRandomTile();
-        addRandomTile();
-        updateView();
-    }
-
-    function addRandomTile() {
-        let emptyCells = [];
-        for (let r = 0; r < 4; r++) {
-            for (let c = 0; c < 4; c++) {
-                if (board[r][c] === 0) emptyCells.push({r, c});
-            }
-        }
-        if (emptyCells.length > 0) {
-            let {r, c} = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-            board[r][c] = Math.random() < 0.9 ? 2 : 4;
-        }
-    }
-
-    function updateView() {
-        const grid = document.getElementById('grid');
-        grid.innerHTML = '';
-        board.forEach(row => {
-            row.forEach(val => {
-                let cell = document.createElement('div');
-                cell.className = 'cell' + (val > 0 ? ` n-${val}` : '');
-                cell.textContent = val > 0 ? val : '';
-                grid.appendChild(cell);
-            });
-        });
-        document.getElementById('score').textContent = score;
-    }
-
-    // 核心處理：滑動一行
-    function slide(row, isSimulating = false) {
-        let arr = row.filter(val => val !== 0);
-        let newRow = [...arr];
-        let gainedScore = 0;
-        for (let i = 0; i < newRow.length - 1; i++) {
-            if (newRow[i] === newRow[i+1]) {
-                newRow[i] *= 2;
-                gainedScore += newRow[i];
-                newRow[i+1] = 0;
-                i++; 
-            }
-        }
-        newRow = newRow.filter(val => val !== 0);
-        while (newRow.length < 4) newRow.push(0);
-        return { newRow, gainedScore };
-    }
-
-    // 旋轉矩陣工具
-    function rotate(matrix) {
-        return matrix[0].map((_, i) => matrix.map(row => row[i]).reverse());
-    }
-
-    // 執行移動（或模擬移動）
-    function executeMove(direction, targetBoard) {
-        let currentBoard = JSON.parse(JSON.stringify(targetBoard));
-        let totalGainedScore = 0;
-        let rotations = 0;
-
-        if (direction === 'ArrowUp') rotations = 3;
-        else if (direction === 'ArrowRight') rotations = 2;
-        else if (direction === 'ArrowDown') rotations = 1;
-
-        for (let i = 0; i < rotations; i++) currentBoard = rotate(currentBoard);
-
-        for (let i = 0; i < 4; i++) {
-            let result = slide(currentBoard[i]);
-            currentBoard[i] = result.newRow;
-            totalGainedScore += result.gainedScore;
-        }
-
-        for (let i = 0; i < (4 - rotations) % 4; i++) currentBoard = rotate(currentBoard);
-
-        return { board: currentBoard, scoreGain: totalGainedScore };
-    }
-
-    // 評估盤面好壞
-    function evaluate(tempBoard) {
-        let evalScore = 0;
-        let emptyCount = 0;
-        for (let r = 0; r < 4; r++) {
-            for (let c = 0; c < 4; c++) {
-                if (tempBoard[r][c] === 0) {
-                    emptyCount++;
-                } else {
-                    // 數值 * 權重
-                    evalScore += Math.log2(tempBoard[r][c]) * WEIGHT_MAP[r][c];
-                }
-            }
-        }
-        return evalScore + (emptyCount * 50); // 空位越多越好
-    }
-
-    function move(dir) {
-        let result = executeMove(dir, board);
-        if (JSON.stringify(board) !== JSON.stringify(result.board)) {
-            board = result.board;
-            score += result.scoreGain;
+        function initGame() {
+            board = Array(4).fill().map(() => Array(4).fill(0));
+            score = 0;
+            addRandomTile();
             addRandomTile();
             updateView();
-            return true;
         }
-        return false;
-    }
 
-    // AI 決策：找出評分最高的方向
-    function aiSmartStep() {
-        const dirs = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
-        let bestDir = null;
-        let maxEval = -Infinity;
+        function addRandomTile(targetBoard = board) {
+            let emptyCells = [];
+            for (let r = 0; r < 4; r++) {
+                for (let c = 0; c < 4; c++) {
+                    if (targetBoard[r][c] === 0) emptyCells.push({ r, c });
+                }
+            }
+            if (emptyCells.length > 0) {
+                let { r, c } = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                targetBoard[r][c] = Math.random() < 0.9 ? 2 : 4;
+            }
+        }
 
-        dirs.forEach(d => {
-            let result = executeMove(d, board);
-            if (JSON.stringify(board) !== JSON.stringify(result.board)) {
-                let currentEval = evaluate(result.board);
-                if (currentEval > maxEval) {
-                    maxEval = currentEval;
-                    bestDir = d;
+        // 核心評分函數 (Heuristic Function)
+        function evaluate(tempBoard) {
+            let smoothness = 0;
+            let monotonicity = 0;
+            let emptyCells = 0;
+            let weightedSum = 0;
+
+            for (let r = 0; r < 4; r++) {
+                for (let c = 0; c < 4; c++) {
+                    let val = tempBoard[r][c];
+                    if (val !== 0) {
+                        let logVal = Math.log2(val);
+                        weightedSum += logVal * WEIGHT_MAP[r][c];
+
+                        // 平滑度：計算與右邊和下方數字的差異
+                        if (c < 3 && tempBoard[r][c + 1] !== 0) {
+                            smoothness -= Math.abs(logVal - Math.log2(tempBoard[r][c + 1]));
+                        }
+                        if (r < 3 && tempBoard[r + 1][c] !== 0) {
+                            smoothness -= Math.abs(logVal - Math.log2(tempBoard[r + 1][c]));
+                        }
+                    } else {
+                        emptyCells++;
+                    }
+                }
+            }
+
+            // 綜合得分：權重值 + 空位加成 + 平滑度加成
+            return weightedSum + (emptyCells * 50) + (smoothness * 10);
+        }
+
+        // 執行移動邏輯 (不改動原盤面)
+        function getNextState(dir, currentBoard) {
+            let tempBoard = JSON.parse(JSON.stringify(currentBoard));
+            let moved = false;
+            let gained = 0;
+
+            // 旋轉
+            const rotate = (m) => m[0].map((_, i) => m.map(row => row[i]).reverse());
+            let rots = { 'ArrowUp': 3, 'ArrowRight': 2, 'ArrowDown': 1, 'ArrowLeft': 0 }[dir];
+
+            for (let i = 0; i < rots; i++) tempBoard = rotate(tempBoard);
+
+            for (let i = 0; i < 4; i++) {
+                let row = tempBoard[i].filter(v => v !== 0);
+                for (let j = 0; j < row.length - 1; j++) {
+                    if (row[j] === row[j + 1]) {
+                        row[j] *= 2;
+                        gained += row[j];
+                        row.splice(j + 1, 1);
+                    }
+                }
+                while (row.length < 4) row.push(0);
+                if (JSON.stringify(tempBoard[i]) !== JSON.stringify(row)) moved = true;
+                tempBoard[i] = row;
+            }
+
+            for (let i = 0; i < (4 - rots) % 4; i++) tempBoard = rotate(tempBoard);
+            return { moved, board: tempBoard, gained };
+        }
+
+        // 升級版 AI：兩步預測 (Lookahead)
+        function aiSmartStep() {
+            const dirs = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+            let bestDir = null;
+            let maxScore = -Infinity;
+
+            dirs.forEach(d => {
+                let firstMove = getNextState(d, board);
+                if (firstMove.moved) {
+                    // 第一層評分
+                    let currentEval = evaluate(firstMove.board);
+
+                    // 模擬電腦隨機放一個 2 後的最佳可能 (簡化版預測)
+                    let minFutureEval = Infinity;
+                    let emptyCells = [];
+                    for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) if (firstMove.board[r][c] === 0) emptyCells.push({ r, c });
+
+                    // 只取前 3 個空位模擬以節省效能
+                    emptyCells.slice(0, 3).forEach(cell => {
+                        let simBoard = JSON.parse(JSON.stringify(firstMove.board));
+                        simBoard[cell.r][cell.c] = 2;
+                        let bestSecondMoveScore = -Infinity;
+                        dirs.forEach(d2 => {
+                            let secondMove = getNextState(d2, simBoard);
+                            if (secondMove.moved) {
+                                bestSecondMoveScore = Math.max(bestSecondMoveScore, evaluate(secondMove.board));
+                            }
+                        });
+                        minFutureEval = Math.min(minFutureEval, bestSecondMoveScore);
+                    });
+
+                    let finalScore = currentEval + (minFutureEval === Infinity ? 0 : minFutureEval * 0.8);
+                    if (finalScore > maxScore) {
+                        maxScore = finalScore;
+                        bestDir = d;
+                    }
+                }
+            });
+
+            if (bestDir) {
+                let res = getNextState(bestDir, board);
+                board = res.board;
+                score += res.gained;
+                addRandomTile();
+                updateView();
+            } else {
+                toggleAI(); // Game Over or Stuck
+            }
+        }
+
+        function updateView() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            board.forEach(row => {
+                row.forEach(val => {
+                    let cell = document.createElement('div');
+                    cell.className = 'cell' + (val > 0 ? ` n-${val}` : '');
+                    cell.textContent = val > 0 ? val : '';
+                    grid.appendChild(cell);
+                });
+            });
+            document.getElementById('score').textContent = score;
+        }
+
+        function toggleAI() {
+            isAI = !isAI;
+            document.getElementById('ai-btn').textContent = isAI ? "停止 AI" : "開啟 AI 終極優化";
+            if (isAI) aiInterval = setInterval(aiSmartStep, 50);
+            else clearInterval(aiInterval);
+        }
+
+        window.addEventListener('keydown', e => {
+            if (!isAI && e.key.startsWith('Arrow')) {
+                let res = getNextState(e.key, board);
+                if (res.moved) {
+                    board = res.board;
+                    score += res.gained;
+                    addRandomTile();
+                    updateView();
                 }
             }
         });
 
-        if (bestDir) move(bestDir);
-        else toggleAI(); // 無法移動則停止
-    }
-
-    function toggleAI() {
-        isAI = !isAI;
-        document.getElementById('ai-btn').textContent = isAI ? "停止 AI" : "開啟 AI 優化模式";
-        document.getElementById('status').textContent = isAI ? "AI 思考中..." : "模式：手動操作";
-        if (isAI) aiInterval = setInterval(aiSmartStep, 100);
-        else clearInterval(aiInterval);
-    }
-
-    window.addEventListener('keydown', e => {
-        if (!isAI && e.key.startsWith('Arrow')) move(e.key);
-    });
-
-    initGame();
-</script>
+        initGame();
+    </script>
 </body>
+
 </html>
