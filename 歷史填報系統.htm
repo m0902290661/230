@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>歷史寒假作業填報系統</title>
+    <style>
+        :root { --primary: #1a73e8; --danger: #d93025; --gray: #5f6368; }
+        body { font-family: sans-serif; background: #f8f9fa; padding: 20px; color: #202124; line-height: 1.5; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
+        h2 { text-align: center; color: var(--primary); }
+        label { display: block; margin-top: 15px; font-weight: bold; font-size: 14px; }
+        input { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #dadce0; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; padding: 12px; margin-top: 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: 500; transition: 0.2s; }
+        .btn-submit { background: var(--primary); color: white; }
+        .btn-submit:hover { background: #1557b0; }
+        .btn-submit:disabled { background: #ccc; cursor: not-allowed; }
+        
+        .autocomplete-items { border: 1px solid #dadce0; border-top: none; max-height: 250px; overflow-y: auto; background: white; position: absolute; width: 100%; z-index: 99; border-radius: 0 0 4px 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .autocomplete-items div { padding: 12px; cursor: pointer; border-bottom: 1px solid #f1f3f4; display: flex; justify-content: space-between; font-size: 14px; }
+        .autocomplete-items div:hover { background: #f8f9fa; }
+        .full-item { color: #bdc1c6; cursor: not-allowed !important; }
+        .full-tag { background: #feeef3; color: #d93025; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        .count-tag { color: var(--primary); font-size: 11px; }
+
+        .admin-section { margin-top: 40px; padding-top: 20px; border-top: 1px solid #dadce0; }
+        #adminControls { display: none; }
+        .btn-admin { background: #f1f3f4; color: var(--gray); font-size: 14px; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12px; }
+        th, td { border: 1px solid #dadce0; padding: 8px; text-align: left; }
+        th { background: #f8f9fa; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>歷史寒假作業參訪填報</h2>
+    
+    <label>學生姓名</label>
+    <input type="text" id="name" placeholder="請輸入姓名">
+    
+    <label>學生學號 (6 位數)</label>
+    <input type="text" id="studentId" placeholder="4930xx" maxlength="6">
+    
+    <label>參訪博物館名稱</label>
+    <div style="position: relative;">
+        <input type="text" id="museumSearch" placeholder="請輸入欲參訪之博物館" oninput="onSearch(this.value)" onfocus="onSearch(this.value)" autocomplete="off">
+        <div id="autocomplete-list" class="autocomplete-items"></div>
+    </div>
+    
+    <button class="btn-submit" id="submitBtn" onclick="submitData()">確認提交</button>
+
+    <div class="admin-section">
+        <div id="adminLoginArea">
+            <input type="password" id="adminPwd" placeholder="管理密碼">
+            <button class="btn-admin" onclick="verifyAdmin()">登入後台</button>
+        </div>
+        <div id="adminControls">
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-admin" style="color:#188038" onclick="ctrlSystem('Open')">開放系統</button>
+                <button class="btn-admin" style="color:#d93025" onclick="ctrlSystem('Closed')">關閉系統</button>
+            </div>
+            <button class="btn-admin" onclick="loadTable()">📊 統整報名表</button>
+            <button class="btn-admin" onclick="location.reload()">登出</button>
+        </div>
+    </div>
+    <div id="resultTable"></div>
+</div>
+
+<script>
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbzL-DNLXgOZSzG88NuFRJ9IEkdEO__5V4CjDrOX23GkV05fKEm_neZZ29y7Qhfqe9-T0Q/exec"; // ⬅️ 務必替換
+    let MUSEUM_DATABASE = [];
+
+    // 初始化載入
+    window.onload = async () => {
+        try {
+            const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: "getMuseumList" }) });
+            const data = await res.json();
+            if(data.success) MUSEUM_DATABASE = data.list;
+        } catch(e) { console.error("資料載入失敗"); }
+    };
+
+    function onSearch(val) {
+        const listContainer = document.getElementById("autocomplete-list");
+        listContainer.innerHTML = "";
+        
+        // 過濾：空值顯示前15筆，有值則搜尋
+        const filtered = !val ? MUSEUM_DATABASE.slice(0, 450) : MUSEUM_DATABASE.filter(m => m.name.includes(val)).slice(0, 15);
+
+        filtered.forEach(item => {
+            const div = document.createElement("div");
+            if (item.full) {
+                div.className = "full-item";
+                div.innerHTML = `<span>${item.name}</span> <span class="full-tag">已額滿</span>`;
+            } else {
+                div.innerHTML = `<span>${item.name}</span> <span class="count-tag">餘 ${3 - item.count} 名</span>`;
+                div.onclick = () => {
+                    document.getElementById("museumSearch").value = item.name;
+                    listContainer.innerHTML = "";
+                };
+            }
+            listContainer.appendChild(div);
+        });
+    }
+
+    // 點擊空白處關閉選單
+    document.addEventListener("click", (e) => {
+        if (e.target.id !== "museumSearch") document.getElementById("autocomplete-list").innerHTML = "";
+    });
+
+    async function submitData() {
+        const name = document.getElementById('name').value.trim();
+        const studentId = document.getElementById('studentId').value.trim();
+        const museum = document.getElementById('museumSearch').value.trim();
+
+        if (!name || !studentId || !museum) return alert('欄位不能為空');
+        if (!/^\d{6}$/.test(studentId)) return alert('學號格式應為 6 位數字');
+        
+        const target = MUSEUM_DATABASE.find(m => m.name === museum);
+        if (!target) return alert('請從清單中選擇正確的博物館');
+        if (target.full) return alert('名額已滿');
+
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerText = "提交中...";
+
+        try {
+            const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: "submit", name, studentId, museum }) });
+            const result = await res.json();
+            alert(result.msg);
+            if(result.success) location.reload();
+        } catch(e) {
+            alert("提交失敗，請檢查網路");
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "確認提交";
+        }
+    }
+
+    async function verifyAdmin() {
+        const pwd = document.getElementById('adminPwd').value;
+        const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: "verifyAdmin", pwd }) });
+        const data = await res.json();
+        if (data.success) {
+            document.getElementById('adminLoginArea').style.display = 'none';
+            document.getElementById('adminControls').style.display = 'block';
+        } else { alert(data.msg); }
+    }
+
+    async function ctrlSystem(status) {
+        const pwd = document.getElementById('adminPwd').value;
+        const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: "toggleSystem", status, pwd }) });
+        const data = await res.json();
+        alert(data.msg);
+    }
+
+    async function loadTable() {
+        const pwd = document.getElementById('adminPwd').value;
+        const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: "getAllData", pwd }) });
+        const result = await res.json();
+        if (!result.success) return alert(result.msg);
+
+        let html = '<table>';
+        result.data.forEach((row, i) => {
+            html += '<tr>';
+            row.forEach(cell => {
+                let val = (i > 0 && cell.toString().includes('GMT')) ? new Date(cell).toLocaleString() : cell;
+                html += i === 0 ? `<th>${val}</th>` : `<td>${val}</td>`;
+            });
+            html += '</tr>';
+        });
+        html += '</table>';
+        document.getElementById('resultTable').innerHTML = html;
+    }
+</script>
+</body>
+</html>
