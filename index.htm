@@ -107,6 +107,11 @@
             cursor: pointer;
         }
 
+        .ifrt {
+            max-width: 100%;
+            overflow: scroll;
+        }
+
         @media (max-width:768px) {
             .menu {
                 display: none;
@@ -165,9 +170,13 @@
                 <img src="校務.png" alt="">
                 <a target="_blank" href="https://portal.k12.ntut.edu.tw">校務系統</a>
             </div>
+            <div id="m2_5" class="menu_a" onclick="location.href='http://www.holdmean.org.tw/'">
+                <img src="校網.png" alt="">
+                <a target="_blank" href="http://www.holdmean.org.tw/">弘明校網</a>
+            </div>
         </div>
         <div style="text-align: right;">
-            <p><a onclick="menu('-')" class="menu2_0a">〈</a><span style="margin: 5px;" id="menuout">1/4</span><a
+            <p><a onclick="menu('-')" class="menu2_0a">〈</a><span style="margin: 5px;" id="menuout">1/5</span><a
                     onclick="menu('+')" class="menu2_0a">〉</a></p>
         </div>
     </div>
@@ -192,69 +201,79 @@
             <img src="校務.png" alt="">
             <a target="_blank" href="https://portal.k12.ntut.edu.tw">校務系統</a>
         </div>
+        <div id="m2_5" class="menu_a" onclick="location.href='http://www.holdmean.org.tw/'">
+            <img src="校網.png" alt="">
+            <a target="_blank" href="http://www.holdmean.org.tw/">弘明校網</a>
+        </div>
     </div>
 
     <div class="main">
         <div id="ifr">
             <h2>公告內容</h2>
-            <table border="1" cellspacing="0" cellpadding="8">
-                <tr>
-                    <th>日期</th>
-                    <th>標題</th>
-                    <th>內容</th>
-                </tr>
-                <tr>
-                    <td>2026/3/1</td>
-                    <td>114-2行事曆</td>
-                    <td><a href="114-2行事曆(公告版).pdf">114-2行事曆</a></td>
-                </tr>
-                <tr>
-                    <td>2026/1/31</td>
-                    <td>2026.1.30~31相關影音</td>
-                    <td><a href="https://drive.google.com/drive/folders/1qiu-9KM2AeC2ZpqecuHJdeJiv9JH1nN4?usp=drive_link">雲端</a>
-                    <br><a href="https://youtu.be/Cw3GvODsKNg">[高一智] 114-1 交換禮物 2026 .1.30</a>
-                    </td>
-                </tr>
-                <tr>
-                    <td>2026/1/25</td>
-                    <td>歷史老師mail勘誤</td>
-                    <td>老師忘記在後面加上.tw了QQ 幫你們補上正確地址<br>justin0327@yahoo.com.tw</td>
-                </tr>
-                <tr>
-                    <td>2026/1/25</td>
-                    <td>歷史寒假作業參訪填報結果</td>
-                    <td><a href="歷史寒假作業參訪填報結果.pdf">歷史寒假作業參訪填報結果</a></td>
-                </tr>
-                <tr>
-                    <td>2026/1/21</td>
-                    <td>歷史寒假作業參訪填報</td>
-                    <td><a href="歷史填報系統.htm">前往</a> 填報開放於2026/1/24 p.m.6:00</td>
-                </tr>
-                <tr>
-                    <td>2026/1/9</td>
-                    <td>優質的剪輯軟體及優質的本地ＡＩ字幕及優質的線上ＡＩ字幕</td>
-                    <td>優質的剪輯軟體：<a href="https://www.blackmagicdesign.com/products/davinciresolve">davinci resolve</a> <a href="https://www.sce.ntnu.edu.tw/uploads/upfile/news_upfile/files/%E5%B8%AB%E5%A4%A7%E9%80%B2%E9%99%A2-%E4%B8%8B%E8%BC%89%E4%B8%A6%E5%AE%89%E8%A3%9DDaVinci%20Resolve-202201.pdf">教學文章</a><br>
-                        優質的本地ＡＩ字幕：<a href="https://memo.ac/zh_tw/">memo</a> <a href="https://memo.ac/zh_tw/guide/start-here">教學文章</a><br>
-                        u質的線上ＡＩ字幕：<a href="https://www.csubtitle.com/sub/">csubtitle（免費版可轉換三分鐘）</a>
-                    </td>
-                </tr>
-                <tr>
-                    <td>2025/12/28</td>
-                    <td>文學講座作文打字須知</td>
-                    <td>要特別提醒部分同學要記得寄信給邱老師。另外，也要提醒全班的同學，每一個人都要將作文打成文字檔上傳班級的雲端硬碟，這也是學習歷程檔案的一部分。格式，信件主旨：班級 作文題目；內文才是作文內容喔
-                        <br><span style="color: red;">*</span>附上邱老師gmail:ac061@hmhs.ntct.edu.tw
-                    </td>
-                </tr>
-                <tr>
-                    <td>2025/12/27</td>
-                    <td>牙齒健康問卷</td>
-                    <td>填寫內容：封面、資料保存方式、簽名及問卷。有問題請詢問：）</td>
-                </tr>
-                <tr>
-                    <td>2025/10/18</td>
-                    <td>本土問答</td>
-                    <td>
-                        <textarea name="" id="" class="t1">一、辛棄疾一生想要收復山河，但無數次抱負無法施展。你曾努力過卻沒被肯定，那種失落你是怎麼消化的？你會選擇放棄，還是換一種方式繼續前行？是什麼能讓你在無力感裡，仍然告訴自己「我還想再試一次」？
+            <div class="ifrt">
+                <table border="1" cellspacing="0" cellpadding="8">
+                    <tr>
+                        <th>日期</th>
+                        <th>標題</th>
+                        <th>內容</th>
+                    </tr>
+                    <tr>
+                        <td>2026/3/1</td>
+                        <td>114-2行事曆</td>
+                        <td><a href="114-2行事曆(公告版).pdf">114-2行事曆</a></td>
+                    </tr>
+                    <tr>
+                        <td>2026/1/31</td>
+                        <td>2026.1.30~31相關影音</td>
+                        <td><a
+                                href="https://drive.google.com/drive/folders/1qiu-9KM2AeC2ZpqecuHJdeJiv9JH1nN4?usp=drive_link">雲端</a>
+                            <br><a href="https://youtu.be/Cw3GvODsKNg">[高一智] 114-1 交換禮物 2026 .1.30</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>2026/1/25</td>
+                        <td>歷史老師mail勘誤</td>
+                        <td>老師忘記在後面加上.tw了QQ 幫你們補上正確地址<br>justin0327@yahoo.com.tw</td>
+                    </tr>
+                    <tr>
+                        <td>2026/1/25</td>
+                        <td>歷史寒假作業參訪填報結果</td>
+                        <td><a href="歷史寒假作業參訪填報結果.pdf">歷史寒假作業參訪填報結果</a></td>
+                    </tr>
+                    <tr>
+                        <td>2026/1/21</td>
+                        <td>歷史寒假作業參訪填報</td>
+                        <td><a href="歷史填報系統.htm">前往</a> 填報開放於2026/1/24 p.m.6:00</td>
+                    </tr>
+                    <tr>
+                        <td>2026/1/9</td>
+                        <td>優質的剪輯軟體及優質的本地ＡＩ字幕及優質的線上ＡＩ字幕</td>
+                        <td>優質的剪輯軟體：<a href="https://www.blackmagicdesign.com/products/davinciresolve">davinci
+                                resolve</a> <a
+                                href="https://www.sce.ntnu.edu.tw/uploads/upfile/news_upfile/files/%E5%B8%AB%E5%A4%A7%E9%80%B2%E9%99%A2-%E4%B8%8B%E8%BC%89%E4%B8%A6%E5%AE%89%E8%A3%9DDaVinci%20Resolve-202201.pdf">教學文章</a><br>
+                            優質的本地ＡＩ字幕：<a href="https://memo.ac/zh_tw/">memo</a> <a
+                                href="https://memo.ac/zh_tw/guide/start-here">教學文章</a><br>
+                            u質的線上ＡＩ字幕：<a href="https://www.csubtitle.com/sub/">csubtitle（免費版可轉換三分鐘）</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>2025/12/28</td>
+                        <td>文學講座作文打字須知</td>
+                        <td>要特別提醒部分同學要記得寄信給邱老師。另外，也要提醒全班的同學，每一個人都要將作文打成文字檔上傳班級的雲端硬碟，這也是學習歷程檔案的一部分。格式，信件主旨：班級
+                            作文題目；內文才是作文內容喔
+                            <br><span style="color: red;">*</span>附上邱老師gmail:ac061@hmhs.ntct.edu.tw
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>2025/12/27</td>
+                        <td>牙齒健康問卷</td>
+                        <td>填寫內容：封面、資料保存方式、簽名及問卷。有問題請詢問：）</td>
+                    </tr>
+                    <tr>
+                        <td>2025/10/18</td>
+                        <td>本土問答</td>
+                        <td>
+                            <textarea name="" id="" class="t1">一、辛棄疾一生想要收復山河，但無數次抱負無法施展。你曾努力過卻沒被肯定，那種失落你是怎麼消化的？你會選擇放棄，還是換一種方式繼續前行？是什麼能讓你在無力感裡，仍然告訴自己「我還想再試一次」？
 為什麼？(請舉出個人的實際例子)
 
 
@@ -264,14 +283,15 @@
 
 三、蔣捷說「少年聽雨歌樓上，壯年聽雨客舟中，而今聽雨僧廬下」，人生階段不同，心情也不同。請舉出這兩三年當中，面對親情、友情、感情、課業、人生、生涯規劃等等，隨著年齡增長而有過不同的領悟與體會
 </textarea>
-                    </td>
-                </tr>
-                <tr>
-                    <td>2025/09/27</td>
-                    <td>本學期行事曆</td>
-                    <td><a href="114-1行事曆(校外版)２.pdf" target="_blank">查看行事曆</a></td>
-                </tr>
-            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>2025/09/27</td>
+                        <td>本學期行事曆</td>
+                        <td><a href="114-1行事曆(校外版)２.pdf" target="_blank">查看行事曆</a></td>
+                    </tr>
+                </table>
+            </div>
         </div>
         <div>
             <h2>學習資源</h2>
@@ -380,28 +400,27 @@
         <button onclick="test()">test</button>
     </div>
 
-    <script src="跨年.js"></script>
     <script>
-        function cu(){
-            let ver = '1.0';
+        function cu() {
+            let ver = '1.0';//換版本
             let userver = localStorage.getItem('userver');
-            if(ver!==userver){
+            if (ver !== userver) {
                 localStorage.setItem('userver', ver);
-                location.href='teach.htm';
+                location.href = 'teach.htm';
                 return;
             }
             return;
         }
 
-        function test(){
-            let i =0;
+        function test() {
+            let i = 0;
             i = prompt('1.重置用戶版本資訊')
-            if(i==='1'){
+            if (i === '1') {
                 localStorage.removeItem('userver');
             }
         }
 
-        window.onload = function(){
+        window.onload = function () {
             menu_s();
             cu();
         }
@@ -411,39 +430,42 @@
             document.getElementById('m2_2').style.display = 'none';
             document.getElementById('m2_3').style.display = 'none';
             document.getElementById('m2_4').style.display = 'none';
+            document.getElementById('m2_5').style.display = 'none';
         }
         function menu_s() {
             document.getElementById('m2_2').style.display = 'none';
             document.getElementById('m2_3').style.display = 'none';
             document.getElementById('m2_4').style.display = 'none';
+            document.getElementById('m2_5').style.display = 'none';
         }
         let nowi = 1;
+        let nowhi = 5;//有幾張
         function menu(i) {
             if (i === '+') {
                 nowi++;
-                if (nowi > 4) {
+                if (nowi > nowhi) {
                     nowi = 1;
                     menu_clear();
                     document.getElementById('m2_1').style.display = 'block';
-                    document.getElementById('menuout').innerHTML = String(nowi + '/4');
+                    document.getElementById('menuout').innerHTML = String(nowi + '/' + nowhi);
                     return;
                 }
                 menu_clear();
                 document.getElementById('m2_' + String(nowi)).style.display = 'block';
-                document.getElementById('menuout').innerHTML = String(nowi + '/4');
+                document.getElementById('menuout').innerHTML = String(nowi + '/' + nowhi);
                 return;
             } else if (i === '-') {
                 nowi--;
                 if (nowi < 1) {
-                    nowi = 4;
+                    nowi = nowhi;
                     menu_clear();
-                    document.getElementById('m2_4').style.display = 'block';
-                    document.getElementById('menuout').innerHTML = String(nowi + '/4');
+                    document.getElementById('m2_5').style.display = 'block';
+                    document.getElementById('menuout').innerHTML = String(nowi + '/' + nowhi);
                     return;
                 }
                 menu_clear();
                 document.getElementById('m2_' + String(nowi)).style.display = 'block';
-                document.getElementById('menuout').innerHTML = String(nowi + '/4');
+                document.getElementById('menuout').innerHTML = String(nowi + '/' + nowhi);
                 return;
             }
         }
