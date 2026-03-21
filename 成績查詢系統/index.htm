@@ -1,18 +1,119 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>高一智 成績查詢系統</title>
+    <style>
+        body { font-family: "Microsoft JhengHei", sans-serif; margin: 0; background: #f4f4f4; text-align: center; }
+        .header { background: black; color: white; padding: 15px; }
+        .banner { background: gray; color: white; padding: 40px; font-size: 20px; line-height: 1.6; }
+        .container { max-width: 400px; margin: 20px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; }
+        button { width: 100%; padding: 12px; background: #333; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; transition: 0.3s; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .score-box { margin-top: 20px; text-align: left; border-top: 2px solid #eee; padding-top: 10px; }
+        .score-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .error-msg { color: #d9534f; background: #f9f2f2; padding: 10px; border-radius: 5px; margin: 10px 0; font-size: 14px; display: none; }
+    </style>
 </head>
 <body>
-    <div class="header">
-        <div>
-            <h1>成績查詢系統</h1>
-        </div>
-        <div>
-            <p></p>
-        </div>
+
+<div class="header"><h1>成績查詢系統</h1></div>
+<div class="banner">志於道 據於德<br>依於仁 游於藝</div>
+
+<div class="container">
+    <div id="loginSection">
+        <div id="errMsg" class="error-msg"></div>
+        <label>選擇查詢項目：</label>
+        <select id="weekSelect"><option>正在連線資料庫...</option></select>
+        <input type="password" id="ps" placeholder="身分證後五碼">
+        <button id="btn" onclick="query()" disabled>請稍候...</button>
     </div>
+
+    <div id="resultSection" style="display:none;">
+        <h3>歡迎，<span id="uName"></span> 同學</h3>
+        <p id="currentWeek" style="color: #666; font-size: 14px;"></p>
+        <div id="scoreContent" class="score-box"></div>
+        <button onclick="location.reload()" style="margin-top:20px; background:#666;">登出 / 重新查詢</button>
+    </div>
+</div>
+
+<div style="margin-top: 20px; color: #888; font-size: 12px;">&copy; 高一智</div>
+
+<script>
+    // --- 重要：請替換為你的 GAS 網址 ---
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxaom8-P6tlIjytmedzJmaYqhsQMAOrz8jxrxup8UKZPDZGx1MVPnpiLqB8nU1vUIBm/exec"; 
+
+    const weekSelect = document.getElementById('weekSelect');
+    const btn = document.getElementById('btn');
+    const errMsg = document.getElementById('errMsg');
+
+    // 1. 初始化：抓取週次列表
+    window.onload = () => {
+        fetch(`${GAS_URL}?action=getWeeks`)
+            .then(res => res.json())
+            .then(data => {
+                // 檢查回傳的是否為陣列
+                if (Array.isArray(data)) {
+                    weekSelect.innerHTML = data.map(w => `<option value="${w}">${w}</option>`).join('');
+                    btn.disabled = false;
+                    btn.innerText = "登入查詢";
+                } else {
+                    // 如果不是陣列，代表後端報錯了
+                    throw new Error(data.message || "後端回傳格式異常");
+                }
+            })
+            .catch(err => {
+                showError("連線失敗：" + err.message);
+                weekSelect.innerHTML = `<option>讀取失敗</option>`;
+            });
+    };
+
+    // 2. 查詢成績
+    function query() {
+        const ps = document.getElementById('ps').value;
+        const week = weekSelect.value;
+        if(!ps) return alert("請輸入身分證後五碼");
+
+        btn.disabled = true;
+        btn.innerText = "查詢中...";
+        errMsg.style.display = 'none';
+
+        fetch(`${GAS_URL}?action=query&ps=${ps}&week=${encodeURIComponent(week)}`)
+            .then(res => res.json())
+            .then(res => {
+                if(res.status === "success") {
+                    document.getElementById('loginSection').style.display = 'none';
+                    document.getElementById('resultSection').style.display = 'block';
+                    document.getElementById('uName').innerText = res.userName;
+                    document.getElementById('currentWeek').innerText = "查詢項目：" + week;
+                    
+                    if(!res.data) {
+                        document.getElementById('scoreContent').innerHTML = `<p style="color:#d9534f; text-align:center;">${res.message}</p>`;
+                    } else {
+                        let html = "";
+                        for(let k in res.data) {
+                            html += `<div class="score-item"><span>${k}</span><b>${res.data[k]}</b></div>`;
+                        }
+                        document.getElementById('scoreContent').innerHTML = html;
+                    }
+                } else {
+                    showError(res.message);
+                }
+            })
+            .catch(err => showError("系統連線異常，請稍後再試"))
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerText = "登入查詢";
+            });
+    }
+
+    function showError(msg) {
+        errMsg.innerText = msg;
+        errMsg.style.display = 'block';
+    }
+</script>
+
 </body>
 </html>
