@@ -5,16 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>有趣的頁面</title>
     <style>
-        a{
-            color: blue;
+        body{
+            padding: 15px;
+        }
+        summary{
+            text-decoration: underline;
             cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <h1>此頁是一些許元洧做的py應用程式，僅作測試用</h1>
+    <h1>有趣的頁面</h1>
+    <h2>此頁是一些許元洧做的py應用程式，僅作測試用</h2>
     <a href="16-9計算器.zip">16-9計算器(only mac)</a><br>
     <a href="YoutubeDownloader-Windows.zip">youtube_downloader(only win)</a>
     <p>附註：only mac 只有mac可以使用<br>only win 只有windows可以使用<br>ALL 適用所有平台</p>
+    <br>
+    <p>若遇到問題 請通報許元洧</p>
+    <br>
+    <h3>常見問題：</h3>
+    <details>
+        <summary>16-9計算器</summary>
+        <div>
+            <p>這個程式很單純，尚未收到問題回報。</p>
+        </div>
+    </details>
+    <details>
+        <summary>youtube_downloader</summary>
+        <div>
+            <h4>錯誤代碼：unable to open for writing 解決方式：</h4>
+            <p>若將程式移至桌面執行尚未能解決問題，請嘗試以下方式</p>
+            <p>1. 權限不足 (最常見)</p>
+            <p>如果你嘗試將影片下載到系統資料夾（如 C:\ 根目錄或 Program Files），Windows 會拒絕寫入。</p>
+            <p>試著用 管理員權限 開啟</p>
+            <p>2. 防毒軟體攔截</p>
+            <p>Windows Defender 或第三方防毒軟體（如 Avast, Norton）有時會將 Python 的寫入行為誤判為惡意程式（勒索軟體保護）。</p>
+            <p>解決方法： 檢查「Windows 安全性」>「病毒與威脅防護」>「管理勒索軟體保護」，看看是否開啟了「受控資料夾存取權」。如果是，請將其關閉或將 Python 加入白名單。</p>
+            <p>3. 磁碟空間已滿</p>
+            <p>這點雖然聽起來很蠢，但下載高畫質影片（如 4K）非常佔空間，如果硬碟滿了也會報這個錯。</p>
+        </div>
+    </details>
 </body>
 </html>
