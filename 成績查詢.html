@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高一智班務系統 - 當週成績總覽分析</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --dark-color: #2c3e50;
+            --light-bg: #f8f9fa;
+            --border-color: #e0e0e0;
+            --green-color: #2ecc71;
+            --purple-color: #9b59b6;
+            --orange-color: #e67e22;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Noto Sans TC', sans-serif; }
+        body { background-color: var(--light-bg); padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        
+        .container { background: white; width: 100%; max-width: 950px; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--light-bg); padding-bottom: 15px; margin-bottom: 20px; }
+        .back-btn { background: var(--dark-color); color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 14px; display: flex; align-items: center; gap: 5px; }
+        .back-btn:hover { background: #1a252f; }
+        
+        .user-status-bar { background: linear-gradient(135deg, #34495e, #2c3e50); color: white; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; font-size: 15px; }
+        .user-tag { background: var(--primary-color); padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+
+        /* 💡 總排名榮譽看板卡片 */
+        .summary-dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; display: none; }
+        .summary-card { background: #fff; border: 1px solid var(--border-color); padding: 15px; border-radius: 8px; text-align: center; }
+        .summary-card.highlight { background: linear-gradient(135deg, #9b59b6, #8e44ad); color: white; border: none; }
+        .sum-title { font-size: 13px; color: #7f8c8d; margin-bottom: 5px; }
+        .summary-card.highlight .sum-title { color: #f5eeef; }
+        .sum-value { font-size: 26px; font-weight: 700; color: var(--dark-color); }
+        .summary-card.highlight .sum-value { color: white; font-size: 32px; }
+
+        .search-box { display: flex; gap: 15px; margin-bottom: 25px; background: var(--light-bg); padding: 15px; border-radius: 8px; align-items: center; }
+        select { flex-grow: 1; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 16px; background: white; }
+        .query-btn { background: var(--primary-color); color: white; border: none; padding: 10px 25px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; white-space: nowrap; }
+        
+        /* 雙主欄佈局：左表右級距 */
+        .main-data-layout { display: grid; grid-template-columns: 1fr; gap: 25px; display: none; }
+        @media (min-width: 800px) { .main-data-layout { grid-template-columns: 1.6fr 1fr; } }
+
+        .table-responsive { width: 100%; overflow-x: auto; border-radius: 8px; border: 1px solid var(--border-color); background: white; }
+        table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        th, td { padding: 12px 14px; text-align: center; border-bottom: 1px solid var(--border-color); font-size: 14px; }
+        th { background-color: #f1f4f6; color: var(--dark-color); font-weight: 700; }
+        
+        /* 💡 級距圖表樣式 */
+        .distribution-box { background: white; border: 1px solid var(--border-color); padding: 20px; border-radius: 8px; }
+        .dist-title { font-size: 16px; font-weight: bold; margin-bottom: 15px; color: var(--dark-color); display: flex; align-items: center; gap: 8px; }
+        .dist-row { margin-bottom: 12px; }
+        .dist-label { font-size: 13px; color: #555; display: flex; justify-content: space-between; margin-bottom: 4px; }
+        .progress-bar-bg { background: #ecf0f1; height: 12px; border-radius: 6px; overflow: hidden; }
+        .progress-bar-fill { background: var(--primary-color); height: 100%; width: 0%; transition: width 0.6s ease; }
+
+        .score-text { font-size: 16px; font-weight: 700; }
+        .score-fail { color: #e74c3c; }
+        .score-pass { color: var(--green-color); }
+        .badge { background: #f5eef8; color: var(--purple-color); padding: 3px 6px; border-radius: 4px; font-weight: bold; font-size: 12px; }
+        .loading { text-align: center; color: #888; padding: 10px 0; font-size: 16px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2><i class="fa-solid fa-chart-line" style="color:var(--purple-color);"></i> 當週全科成績與級距分析</h2>
+        <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> 返回首頁</a>
+    </div>
+
+    <div class="user-status-bar">
+        <div><i class="fa-solid fa-user-check"></i> 當前查詢學生：<span id="currentUserDisplay" style="font-weight:700;">載入中...</span></div>
+        <span class="user-tag">大數據分析面板</span>
+    </div>
+
+    <div class="search-box">
+        <label for="weekSelect" style="font-weight:500; white-space:nowrap;">選擇指定考程：</label>
+        <select id="weekSelect">
+            <option value="第一週">第一週平時小考</option>
+            <option value="第二週">第二週平時小考</option>
+            <option value="第一次段考">第一次段考</option>
+        </select>
+        <button class="query-btn" id="queryBtn">一鍵生成分析</button>
+    </div>
+
+    <div class="loading" id="statusText">請點擊按鈕載入大數據分析結果...</div>
+
+    <div class="summary-dashboard" id="summaryDashboard">
+        <div class="summary-card highlight border-purple">
+            <div class="sum-title"><i class="fa-solid fa-trophy"></i> 當週全班總排名</div>
+            <div class="sum-value" id="totalRank">第 -- 名</div>
+            <div style="font-size:12px; color:#e0e0e0; margin-top:5px;">有效評比人數：<span id="totalClassSize">0</span> 人</div>
+        </div>
+        <div class="summary-card">
+            <div class="sum-title">當週應考考科數</div>
+            <div class="sum-value" id="mySubjCount" style="color:var(--primary-color)">0 科</div>
+        </div>
+        <div class="summary-card">
+            <div class="sum-title">當週全科平均分</div>
+            <div class="sum-value" id="myWeekAvg" style="color:var(--green-color)">0.0 分</div>
+        </div>
+    </div>
+
+    <div class="main-data-layout" id="mainDataLayout">
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>科目</th>
+                        <th>您的分數</th>
+                        <th>單科排名</th>
+                        <th>班級平均</th>
+                        <th>標準差</th>
+                    </tr>
+                </thead>
+                <tbody id="scoreTableBody"></tbody>
+            </table>
+        </div>
+
+        <div class="distribution-box">
+            <div class="dist-title"><i class="fa-solid fa-chart-bar" style="color:var(--orange-color)"></i> 全班當週平均分級距</div>
+            <div id="distributionContainer">
+                </div>
+            <p style="font-size:11px; color:#aaa; margin-top:10px; line-height:1.4;">* 級距橫條圖代表全班各分數區間的人數佔比，反映本次考程的題目難易度分佈。</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    let gasUrl = "";
+    let username = "";
+
+    window.onload = function() {
+        const isLoggedIn = localStorage.getItem("isLoggedIn");
+        username = localStorage.getItem("username");
+        const nickname = localStorage.getItem("nickname");
+
+        if (isLoggedIn !== "true" || !username) {
+            window.location.href = "login.html"; return;
+        }
+        document.getElementById('currentUserDisplay').textContent = `${nickname} (${username})`;
+
+        fetch('api.json').then(res => res.json()).then(config => {
+            gasUrl = config.GAS_WEB_APP_URL;
+            fetchAllScores();
+        });
+    };
+
+    document.getElementById('queryBtn').addEventListener('click', fetchAllScores);
+
+    function fetchAllScores() {
+        if (!gasUrl) return;
+
+        const selectedWeek = document.getElementById('weekSelect').value;
+        const layout = document.getElementById('mainDataLayout');
+        const dashboard = document.getElementById('summaryDashboard');
+        const statusText = document.getElementById('statusText');
+        const tbody = document.getElementById('scoreTableBody');
+        const distContainer = document.getElementById('distributionContainer');
+
+        layout.style.display = "none";
+        dashboard.style.display = "none";
+        statusText.style.display = "block";
+        statusText.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 正在矩陣運算全班總排名，並生成全班級距直方圖...';
+
+        fetch(gasUrl, {
+            method: "POST",
+            mode: "cors",
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify({ action: "getScore", username: username, week: selectedWeek })
+        })
+        .then(res => res.json())
+        .then(resData => {
+            statusText.style.display = "none";
+            
+            if (resData.status === "success") {
+                // 1. 渲染頂部總和看板
+                const sum = resData.summary;
+                document.getElementById('totalRank').textContent = `第 ${sum.totalRank} 名`;
+                document.getElementById('totalClassSize').textContent = sum.totalClassSize;
+                document.getElementById('myWeekAvg').textContent = `${sum.myWeekAvg} 分`;
+                
+                // 2. 渲染左側科目明細
+                const list = resData.data;
+                let tableHtml = "";
+                let validCount = 0;
+                
+                list.forEach(item => {
+                    if (item.hasScore) {
+                        validCount++;
+                        const isPass = item.myScore >= 60;
+                        const diff = (item.myScore - item.classAvg).toFixed(1);
+                        const diffText = diff >= 0 ? `(+${diff})` : `(${diff})`;
+                        const diffColor = diff >= 0 ? 'var(--green-color)' : '#e74c3c';
+
+                        tableHtml += `
+                            <tr>
+                                <td style="font-weight:700;">${item.subject}</td>
+                                <td><span class="score-text ${isPass?'score-pass':'score-fail'}">${item.myScore}</span> <span style="font-size:11px; color:${diffColor}">${diffText}</span></td>
+                                <td><span class="badge">第 ${item.classRank} 名</span></td>
+                                <td>${item.classAvg}</td>
+                                <td style="color:#777;">${item.classStdDev}</td>
+                            </tr>`;
+                    } else {
+                        tableHtml += `<tr><td style="font-weight:700;">${item.subject}</td><td colspan="4" style="color:#aaa; font-style:italic;">─ ${item.msg} ─</td></tr>`;
+                    }
+                });
+                document.getElementById('mySubjCount').textContent = `${validCount} 科`;
+                tbody.innerHTML = tableHtml;
+
+                // 3. 💡 渲染右側級距長條圖
+                const intervals = sum.intervals;
+                let distHtml = "";
+                
+                // 找出級距中人數最多的是多少人，用來當作 100% 比例基準
+                let maxPeople = 0;
+                for (let key in intervals) { if (intervals[key] > maxPeople) maxPeople = intervals[key]; }
+
+                // 依照分數高低依序排下來
+                const keysOrder = ["90+", "80-89", "70-79", "60-69", "50-59", "50-"];
+                const labelMap = { "90+": "90 分以上", "80-89": "80 ~ 89 分", "70-79": "70 ~ 79 分", "60-69": "60 ~ 69 分", "50-59": "50 ~ 59 分", "50-": "50 分以下" };
+
+                keysOrder.forEach(key => {
+                    const count = intervals[key];
+                    // 計算動態百分比條
+                    const percentage = maxPeople > 0 ? (count / maxPeople) * 100 : 0;
+                    
+                    distHtml += `
+                        <div class="dist-row">
+                            <div class="dist-label">
+                                <span>${labelMap[key]}</span>
+                                <span style="font-weight:bold; color:var(--dark-color)">${count} 人</span>
+                            </div>
+                            <div class="progress-bar-bg">
+                                <div class="progress-bar-fill" style="width: ${percentage}%;"></div>
+                            </div>
+                        </div>`;
+                });
+                distContainer.innerHTML = distHtml;
+
+                // 展開網頁版面
+                dashboard.style.display = "grid";
+                layout.style.display = "grid";
+            } else {
+                statusText.style.display = "block"; statusText.style.color = "red"; statusText.textContent = resData.message;
+            }
+        })
+        .catch(err => { statusText.style.display = "block"; statusText.style.color = "red"; statusText.textContent = "連線異常。"; });
+    }
+</script>
+</body>
+</html>

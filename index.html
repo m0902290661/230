@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高一智班務系統</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --sidebar-width: 260px;
+            --primary-color: #3498db;
+            --dark-color: #2c3e50;
+            --light-bg: #f8f9fa;
+            --text-color: #333;
+            --border-color: #e0e0e0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-color);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--dark-color);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .sidebar-brand {
+            padding: 15px 20px;
+            background-color: #1a252f;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #34495e;
+        }
+
+        .sidebar-logo {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 15px 0;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .sidebar-menu li a {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 25px;
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .sidebar-menu li a:hover,
+        .sidebar-menu li.active a {
+            background-color: #34495e;
+            color: var(--primary-color);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .sidebar-footer {
+            padding: 15px 20px;
+            background-color: #1a252f;
+        }
+
+        .logout-btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+
+        /* --- Main Content --- */
+        .main-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .top-navbar {
+            height: 60px;
+            background-color: #fff;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+        }
+
+        .menu-toggle {
+            display: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--dark-color);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .content-container {
+            padding: 30px;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .page-section {
+            display: none;
+        }
+
+        .page-section.active {
+            display: block;
+        }
+
+        .welcome-card {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 25px;
+        }
+
+        .welcome-card h1 {
+            color: var(--dark-color);
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        /* 快捷卡片樣式 */
+        .feature-card {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .feature-card i {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+
+        /* 公共組件 */
+        .section-title {
+            font-size: 24px;
+            color: var(--dark-color);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .loading-text {
+            text-align: center;
+            color: #888;
+            padding: 20px;
+            font-size: 16px;
+        }
+
+        /* 訊息清單共用外觀 (公告與私訊通用) */
+        .msg-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .msg-item {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .msg-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 12px;
+        }
+
+        .msg-meta {
+            font-size: 14px;
+            color: #888;
+            display: flex;
+            gap: 15px;
+        }
+
+        .msg-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--dark-color);
+        }
+
+        .msg-content {
+            color: #555;
+            line-height: 1.6;
+            white-space: pre-line;
+        }
+
+        /* 私人訊息框特別點綴 */
+        .msg-item.private-style {
+            border-left: 4px solid #9b59b6;
+        }
+
+        /* 💡 新增：常用連結網格與卡片樣式 */
+        .links-title {
+            font-size: 20px;
+            color: var(--dark-color);
+            margin: 30px 0 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+        }
+
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .link-card {
+            background: white;
+            padding: 18px 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .link-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border-color: var(--primary-color);
+        }
+
+        .link-card i {
+            font-size: 22px;
+        }
+
+        .link-info h4 {
+            font-size: 15px;
+            color: var(--dark-color);
+            margin-bottom: 2px;
+        }
+
+        .link-info p {
+            font-size: 11px;
+            color: #95a5a6;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                position: fixed;
+                left: calc(-1 * var(--sidebar-width));
+                top: 0;
+                bottom: 0;
+                width: var(--sidebar-width);
+                height: 100vh;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .top-navbar {
+                padding: 0 20px;
+            }
+
+            .content-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <img src="logo.png" alt="Logo" class="sidebar-logo" onerror="this.style.display='none';">
+            <span class="sidebar-title">高一智班務系統</span>
+        </div>
+        <ul class="sidebar-menu" id="menuList">
+            <li class="active" data-target="homeSection"><a><i class="fa-solid fa-house"></i>系統首頁</a></li>
+            <li data-target="announcementSection"><a><i class="fa-solid fa-bullhorn"></i>班級公告欄</a></li>
+            <li data-target="privateMsgSection"><a><i class="fa-solid fa-envelope-open-text"></i>個人私人訊息</a></li>
+            <li onclick="window.open('https://classvideos.huatingtea.com', '_blank')">
+                <a><i class="fa-solid fa-video" style="color: #e74c3c;"></i>課程影音</a>
+            </li>
+            <li onclick="window.location.href='成績查詢.html'"><a><i class="fa-solid fa-square-poll-vertical"></i>成績查詢系統</a>
+            </li>
+            <li onclick="window.location.href='問題回報.html'"><a><i class="fa-solid fa-triangle-exclamation" style="color:#e67e22;"></i>問題與意見回報</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <button class="logout-btn" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i>登出系統</button>
+        </div>
+    </nav>
+
+    <div class="main-wrapper">
+        <header class="top-navbar">
+            <div class="menu-toggle" id="menuToggle"><i class="fa-solid fa-bars"></i></div>
+            <div class="user-info">
+                <div class="user-avatar" id="avatarDisplay">U</div>
+                <span id="navNameDisplay">學生</span>
+            </div>
+        </header>
+
+        <main class="content-container">
+
+            <section id="homeSection" class="page-section active">
+                <div class="welcome-card">
+                    <h1>嗨，<span id="nameDisplay" style="color: var(--primary-color);"></span>！</h1>
+                    <p>歡迎來到高一智班務系統。請點選下方功能卡片或常用連結開始使用。</p>
+                </div>
+
+                <div class="features-grid">
+                    <div class="feature-card" onclick="switchPage('announcementSection')">
+                        <i class="fa-solid fa-bullhorn" style="color:#e67e22;"></i>
+                        <h3>班級公告欄</h3>
+                        <p style="font-size:14px; color:#777; margin-top:5px;">查看班級最新的公開公告</p>
+                    </div>
+                    <div class="feature-card" onclick="switchPage('privateMsgSection')">
+                        <i class="fa-solid fa-envelope-open-text" style="color:#9b59b6;"></i>
+                        <h3>個人私人訊息</h3>
+                        <p style="font-size:14px; color:#777; margin-top:5px;">查看老師或幹部給您的私密通知</p>
+                    </div>
+                    <div class="feature-card" onclick="window.open('https://classvideos.huatingtea.com', '_blank')">
+                        <i class="fa-solid fa-video" style="color:#e74c3c;"></i>
+                        <h3>課程影音</h3>
+                        <p style="font-size:14px; color:#777; margin-top:5px;">跳轉至線上課程與影音複習系統</p>
+                    </div>
+                </div>
+
+                <h3 class="links-title"><i class="fa-solid fa-link" style="color:var(--primary-color);"></i> 學校與班級常用連結
+                </h3>
+                <div class="links-grid">
+
+                    <div class="link-card" onclick="window.open('https://students-in-233.blogspot.com/', '_blank')">
+                        <i class="fa-solid fa-blog" style="color:#1abc9c;"></i>
+                        <div class="link-info">
+                            <h4>班導網站</h4>
+                            <p>班級專屬部落格</p>
+                        </div>
+                    </div>
+
+                    <div class="link-card"
+                        onclick="window.open('https://drive.google.com/drive/folders/1l7hrZyXuTcaywCCqOtI5B-mBNfO9xMkO', '_blank')">
+                        <i class="fa-brands fa-google-drive" style="color:#2ecc71;"></i>
+                        <div class="link-info">
+                            <h4>歷程雲端</h4>
+                            <p>學習歷程檔案資料夾</p>
+                        </div>
+                    </div>
+
+                    <div class="link-card" onclick="window.open('https://portal.k12.ntut.edu.tw/', '_blank')">
+                        <i class="fa-solid fa-graduation-cap" style="color:#3498db;"></i>
+                        <div class="link-info">
+                            <h4>校務系統</h4>
+                            <p>國教署智慧校務平台</p>
+                        </div>
+                    </div>
+
+                    <div class="link-card" onclick="window.open('http://www.holdmean.org.tw/', '_blank')">
+                        <i class="fa-solid fa-school" style="color:#e67e22;"></i>
+                        <div class="link-info">
+                            <h4>弘明校網</h4>
+                            <p>弘明實驗高級中學官網</p>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <section id="announcementSection" class="page-section">
+                <h2 class="section-title"><i class="fa-solid fa-bullhorn" style="color: #e67e22;"></i> 班級最新公告</h2>
+                <div id="announcementContainer">
+                    <div class="loading-text">公告載入中...</div>
+                </div>
+            </section>
+
+            <section id="privateMsgSection" class="page-section">
+                <h2 class="section-title"><i class="fa-solid fa-envelope-open-text" style="color: #9b59b6;"></i> 個人專屬訊息
+                </h2>
+                <div id="privateMsgContainer">
+                    <div class="loading-text">訊息安全載入中...</div>
+                </div>
+            </section>
+
+            <section id="timetableSection" class="page-section">
+                <h2 class="section-title">功課表查詢</h2>
+                <div class="feature-card" style="cursor:default;">功能開發中...</div>
+            </section>
+
+        </main>
+    </div>
+
+    <div id="sidebarOverlay"
+        style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.4); z-index:90;">
+    </div>
+
+    <script>
+        let gasUrl = "";
+        let currentUserName = ""; // 儲存目前帳號，用於向後端請求私訊
+
+        window.onload = function () {
+            const isLoggedIn = localStorage.getItem("isLoggedIn");
+            const username = localStorage.getItem("username");
+            const nickname = localStorage.getItem("nickname");
+
+            if (isLoggedIn !== "true" || !username || !nickname) {
+                alert("請先登入系統！");
+                window.location.href = "login.html";
+                return;
+            }
+
+            currentUserName = username;
+            document.getElementById("nameDisplay").textContent = nickname;
+            document.getElementById("navNameDisplay").textContent = `${nickname} (${username})`;
+            document.getElementById("avatarDisplay").textContent = nickname.charAt(0);
+
+            fetch('api.json')
+                .then(res => res.json())
+                .then(config => {
+                    gasUrl = config.GAS_WEB_APP_URL;
+                    // 預載資料
+                    loadAnnouncements();
+                    loadPrivateMessages();
+                })
+                .catch(err => console.error("設定檔讀取失敗", err));
+        };
+
+        // 選單切換點擊事件
+        const menuItems = document.querySelectorAll('#menuList li');
+        menuItems.forEach(item => {
+            item.addEventListener('click', function () {
+                const target = this.getAttribute('data-target');
+                switchPage(target);
+            });
+        });
+
+        // 封裝切換頁面功能（讓首頁點擊卡片也能連動）
+        function switchPage(targetSectionId) {
+            // 更新選單高亮
+            menuItems.forEach(i => {
+                if (i.getAttribute('data-target') === targetSectionId) i.classList.add('active');
+                else i.classList.remove('active');
+            });
+
+            // 切換 Section
+            document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(targetSectionId).classList.add('active');
+
+            // 觸發對應資料更新
+            if (targetSectionId === 'announcementSection') loadAnnouncements();
+            if (targetSectionId === 'privateMsgSection') loadPrivateMessages();
+            if (window.innerWidth <= 768) toggleSidebar();
+        }
+
+        // 載入公開公告
+        function loadAnnouncements() {
+            if (!gasUrl) return;
+            const container = document.getElementById('announcementContainer');
+            fetch(gasUrl, {
+                method: "POST",
+                mode: "cors",
+                headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify({ action: "getAnnouncements" })
+            })
+                .then(res => res.json())
+                .then(resData => {
+                    if (resData.status === "success") {
+                        const list = resData.data;
+                        if (list.length === 0) { container.innerHTML = '<div class="loading-text">目前尚無任何班級公告。</div>'; return; }
+                        let html = '<div class="msg-list">';
+                        list.forEach(item => {
+                            html += `
+                        <div class="msg-item">
+                            <div class="msg-header">
+                                <div class="msg-title">${item.title}</div>
+                                <div class="msg-meta">
+                                    <span><i class="fa-solid fa-calendar"></i> ${item.date}</span>
+                                    <span><i class="fa-solid fa-user"></i> ${item.author}</span>
+                                </div>
+                            </div>
+                            <div class="msg-content">${item.content}</div>
+                        </div>`;
+                        });
+                        container.innerHTML = html + '</div>';
+                    } else { container.innerHTML = `<div class="loading-text" style="color:red;">載入失敗</div>`; }
+                }).catch(err => container.innerHTML = '<div class="loading-text">連線失敗</div>');
+        }
+
+        // 💡 載入個人私人訊息
+        function loadPrivateMessages() {
+            if (!gasUrl || !currentUserName) return;
+            const container = document.getElementById('privateMsgContainer');
+
+            fetch(gasUrl, {
+                method: "POST",
+                mode: "cors",
+                headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify({
+                    action: "getPrivateMessages",
+                    username: currentUserName // 將目前學生帳號送去給後端篩選
+                })
+            })
+                .then(res => res.json())
+                .then(resData => {
+                    if (resData.status === "success") {
+                        const list = resData.data;
+                        if (list.length === 0) {
+                            container.innerHTML = '<div class="loading-text"><i class="fa-solid fa-comment-slash"></i> 目前沒有給您的私人訊息。</div>';
+                            return;
+                        }
+
+                        let html = '<div class="msg-list">';
+                        list.forEach(item => {
+                            html += `
+                        <div class="msg-item private-style">
+                            <div class="msg-header">
+                                <div class="msg-title" style="color:#8e44ad;"><i class="fa-solid fa-user-lock"></i> ${item.title}</div>
+                                <div class="msg-meta">
+                                    <span><i class="fa-solid fa-calendar"></i> ${item.date}</span>
+                                    <span><i class="fa-solid fa-paper-plane"></i> 來自：${item.sender}</span>
+                                </div>
+                            </div>
+                            <div class="msg-content">${item.content}</div>
+                        </div>`;
+                        });
+                        container.innerHTML = html + '</div>';
+                    } else {
+                        container.innerHTML = `<div class="loading-text" style="color:red;">載入失敗：${resData.message}</div>`;
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    container.innerHTML = '<div class="loading-text" style="color:red;">連線失敗。</div>';
+                });
+        }
+
+        // 手機版選單
+        const sidebar = document.getElementById('sidebar');
+        const menuToggle = document.getElementById('menuToggle');
+        const overlay = document.getElementById('sidebarOverlay');
+        function toggleSidebar() {
+            sidebar.classList.toggle('active');
+            overlay.style.display = sidebar.classList.contains('active') ? 'block' : 'none';
+        }
+        menuToggle.addEventListener('click', toggleSidebar);
+        overlay.addEventListener('click', toggleSidebar);
+
+        // 登出
+        document.getElementById("logoutBtn").addEventListener("click", function () {
+            localStorage.clear();
+            alert("您已成功登出。");
+            window.location.href = "login.html";
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系統登入</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f9;
+            margin: 0;
+        }
+
+        .login-container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 320px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+        }
+
+        #message {
+            margin-top: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .success {
+            color: green;
+        }
+
+        .fail {
+            color: red;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div class="login-container">
+        <div id="loginBlock">
+            <img style="height: 24px; border-radius: 5px;" src="logo.png" alt="">
+            <h2>高一智系統登入</h2>
+            <form id="loginForm">
+                <div class="input-group">
+                    <label for="username">帳號</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="input-group">
+                    <label for="password">密碼</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit">登入</button>
+            </form>
+        </div>
+
+        <div id="firstLoginBlock" class="hidden">
+            <h2>首次登入設定</h2>
+            <p style="font-size: 14px; color: #666; text-align: center;">偵測到您是首次登入，請先修改密碼並綁定電子郵件。</p>
+            <form id="profileForm">
+                <div class="input-group">
+                    <label for="newPassword">新密碼</label>
+                    <input type="password" id="newPassword" required minlength="4">
+                </div>
+                <div class="input-group">
+                    <label for="confirmPassword">確認新密碼</label>
+                    <input type="password" id="confirmPassword" required>
+                </div>
+                <div class="input-group">
+                    <label for="email">綁定電子郵件</label>
+                    <input type="email" id="email" required placeholder="example@mail.com">
+                </div>
+                <button type="submit" class="btn-success">儲存並登入</button>
+            </form>
+        </div>
+
+        <div id="message"></div>
+
+        <div class="footer">
+            <p>許元洧維護 若有問題請通報</p>
+        </div>
+    </div>
+
+    <script>
+        let gasUrl = ""; // 用來儲存從 json 抓到的 API 網址
+
+        let userSession = {
+            username: "",
+            nickname: "",
+            rowIndex: -1
+        };
+
+        const messageDiv = document.getElementById('message');
+
+        // 當網頁載入時，自動抓取 api.json
+        window.addEventListener('DOMContentLoaded', () => {
+            fetch('api.json')
+                .then(response => {
+                    if (!response.ok) throw new Error("無法讀取 api.json 設定檔");
+                    return response.json();
+                })
+                .then(config => {
+                    gasUrl = config.GAS_WEB_APP_URL;
+                    console.log("API 網址載入成功");
+                })
+                .catch(error => {
+                    console.error("預載設定失敗:", error);
+                    messageDiv.textContent = "系統初始化失敗，請檢查設定檔。";
+                    messageDiv.className = "fail";
+                });
+        });
+
+        // --- 處理一般登入 ---
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            if (!gasUrl) {
+                alert("API 尚未就緒，請稍後再試。");
+                return;
+            }
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            messageDiv.textContent = "登入中...";
+            messageDiv.className = "";
+
+            fetch(gasUrl, { // 這裡改用抓取到的變數
+                method: "POST",
+                mode: "cors",
+                headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify({
+                    action: "login",
+                    username: username,
+                    password: password
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        userSession.username = username;
+                        userSession.nickname = data.nickname;
+                        userSession.rowIndex = data.rowIndex;
+
+                        if (data.isFirstLogin) {
+                            messageDiv.textContent = "";
+                            document.getElementById('loginBlock').classList.add('hidden');
+                            document.getElementById('firstLoginBlock').classList.remove('hidden');
+                        } else {
+                            messageDiv.textContent = "登入成功，正在導向主頁...";
+                            messageDiv.className = "success";
+
+                            localStorage.setItem("isLoggedIn", "true");
+                            localStorage.setItem("username", username);
+                            localStorage.setItem("nickname", data.nickname);
+
+                            setTimeout(() => { window.location.href = "index.html"; }, 1000);
+                        }
+                    } else {
+                        messageDiv.textContent = data.message;
+                        messageDiv.className = "fail";
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    messageDiv.textContent = "系統連線錯誤。";
+                    messageDiv.className = "fail";
+                });
+        });
+
+        // --- 處理首次登入的資料更新 ---
+        document.getElementById('profileForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            if (!gasUrl) return;
+
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const email = document.getElementById('email').value;
+
+            if (newPassword !== confirmPassword) {
+                messageDiv.textContent = "兩次輸入的密碼不一致！";
+                messageDiv.className = "fail";
+                return;
+            }
+
+            messageDiv.textContent = "正在更新資料...";
+            messageDiv.className = "";
+
+            fetch(gasUrl, { // 這裡改用抓取到的變數
+                method: "POST",
+                mode: "cors",
+                headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify({
+                    action: "updateProfile",
+                    rowIndex: userSession.rowIndex,
+                    newPassword: newPassword,
+                    email: email
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        messageDiv.textContent = "設定成功！正在登入主頁...";
+                        messageDiv.className = "success";
+
+                        localStorage.setItem("isLoggedIn", "true");
+                        localStorage.setItem("username", userSession.username);
+                        localStorage.setItem("nickname", userSession.nickname);
+
+                        setTimeout(() => { window.location.href = "index.html"; }, 1500);
+                    } else {
+                        messageDiv.textContent = data.message;
+                        messageDiv.className = "fail";
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    messageDiv.textContent = "更新失敗，請檢查網路連線。";
+                    messageDiv.className = "fail";
+                });
+        });
+    </script>
+
+</body>
+
+</html>
