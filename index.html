@@ -381,8 +381,9 @@
             </li>
             <li onclick="window.location.href='成績查詢.html'"><a><i class="fa-solid fa-square-poll-vertical"></i>成績查詢系統</a>
             </li>
-            <li onclick="window.location.href='問題回報.html'"><a><i class="fa-solid fa-triangle-exclamation" style="color:#e67e22;"></i>問題與意見回報</a></li>
-        </ul>
+            <li onclick="window.location.href='問題回報.html'"><a><i class="fa-solid fa-triangle-exclamation"
+                        style="color:#e67e22;"></i>問題與意見回報</a></li>
+            </ul>
         <div class="sidebar-footer">
             <button class="logout-btn" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i>登出系統</button>
         </div>
@@ -406,21 +407,31 @@
                 </div>
 
                 <div class="features-grid">
+
+                    <div class="feature-card" onclick="window.location.href='成績查詢.html'">
+                        <i class="fa-solid fa-chart-line" style="color:var(--purple-color);"></i>
+                        <h3>成績查詢系統</h3>
+                        <p>查看當週全科成績、班排名與分數級距直方圖分析</p>
+                    </div>
+
                     <div class="feature-card" onclick="switchPage('announcementSection')">
-                        <i class="fa-solid fa-bullhorn" style="color:#e67e22;"></i>
+                        <i class="fa-solid fa-bullhorn" style="color:var(--orange-color);"></i>
                         <h3>班級公告欄</h3>
-                        <p style="font-size:14px; color:#777; margin-top:5px;">查看班級最新的公開公告</p>
+                        <p>查看導師與班幹部發布的最新班級公開公告</p>
                     </div>
+
                     <div class="feature-card" onclick="switchPage('privateMsgSection')">
-                        <i class="fa-solid fa-envelope-open-text" style="color:#9b59b6;"></i>
+                        <i class="fa-solid fa-envelope-open-text" style="color:var(--primary-color);"></i>
                         <h3>個人私人訊息</h3>
-                        <p style="font-size:14px; color:#777; margin-top:5px;">查看老師或幹部給您的私密通知</p>
+                        <p>查看老師發送給您個人的私密重要通知</p>
                     </div>
+
                     <div class="feature-card" onclick="window.open('https://classvideos.huatingtea.com', '_blank')">
-                        <i class="fa-solid fa-video" style="color:#e74c3c;"></i>
+                        <i class="fa-solid fa-video" style="color:var(--red-color);"></i>
                         <h3>課程影音</h3>
-                        <p style="font-size:14px; color:#777; margin-top:5px;">跳轉至線上課程與影音複習系統</p>
+                        <p>跳轉至線上課程補課與影音複習系統</p>
                     </div>
+
                 </div>
 
                 <h3 class="links-title"><i class="fa-solid fa-link" style="color:var(--primary-color);"></i> 學校與班級常用連結
@@ -437,7 +448,7 @@
 
                     <div class="link-card"
                         onclick="window.open('https://drive.google.com/drive/folders/1l7hrZyXuTcaywCCqOtI5B-mBNfO9xMkO', '_blank')">
-                        <i class="fa-brands fa-google-drive" style="color:#2ecc71;"></i>
+                        <i class="fa-brands fa-google-drive" style="color:var(--green-color);"></i>
                         <div class="link-info">
                             <h4>歷程雲端</h4>
                             <p>學習歷程檔案資料夾</p>
@@ -445,7 +456,7 @@
                     </div>
 
                     <div class="link-card" onclick="window.open('https://portal.k12.ntut.edu.tw/', '_blank')">
-                        <i class="fa-solid fa-graduation-cap" style="color:#3498db;"></i>
+                        <i class="fa-solid fa-graduation-cap" style="color:var(--primary-color);"></i>
                         <div class="link-info">
                             <h4>校務系統</h4>
                             <p>國教署智慧校務平台</p>
@@ -453,7 +464,7 @@
                     </div>
 
                     <div class="link-card" onclick="window.open('http://www.holdmean.org.tw/', '_blank')">
-                        <i class="fa-solid fa-school" style="color:#e67e22;"></i>
+                        <i class="fa-solid fa-school" style="color:var(--orange-color);"></i>
                         <div class="link-info">
                             <h4>弘明校網</h4>
                             <p>弘明實驗高級中學官網</p>
