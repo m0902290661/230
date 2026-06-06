@@ -183,16 +183,18 @@
 <div class="container">
     <img src="logo.png" style="height: 24px;" alt="">
     <h1>成績查詢系統</h1>
-    <a href="index.html">返回系統主頁</a>
+    <br>
+    <a style="text-decoration: none; background-color: black;color: white;border-radius: 5px;padding: 5px;" href="index.html">返回系統主頁</a>
+    <br><br>
 
     <div class="selector-card">
         <div>
             <span id="studentIdent" style="font-size: 1.1rem; font-weight: 600; color: #334155;">正在讀取本機憑證...</span>
         </div>
         <div>
-            <label for="periodSelect" style="font-weight: 500; margin-right: 10px; color: #475569;">選擇分析項目：</label>
+            <label for="periodSelect" style="font-weight: 500; margin-right: 10px; color: #475569;">選擇項目：</label>
             <select id="periodSelect" disabled>
-                <option>等待辨識中...</option>
+                <option>載入中</option>
             </select>
         </div>
     </div>
@@ -205,6 +207,10 @@
             <div class="stat-card avg">
                 <div style="color: #b45309; font-weight: 600;">個人總平均</div>
                 <div class="stat-value" id="pAvg">0</div>
+            </div>
+            <div class="stat-card avg" style="border-top-color: #6366f1;">
+                <div style="color: #4f46e5; font-weight: 600;">班級總平均</div>
+                <div class="stat-value" id="cAvg">0</div>
             </div>
             <div class="stat-card rank">
                 <div style="color: #047857; font-weight: 600;">班級排名</div>
@@ -224,7 +230,7 @@
 
 <script>
     // ⚠️ 請將下方網址替換為您完成部署的 Google Apps Script 網頁應用程式網址
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxX_wKNbARsL6hPBgBzhQPMbHSQjtjHqtJowNOF_IGNqDhR4QrRtr3JW_6boWeyhlwD/exec";
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwOSr9BM4Y9kYtrT9c80DKrc0VOkAR0K2zlLb60nyifxAXpJhYdFW12OJaNZDCunbmg/exec";
 
     // 快取全域數據
     let globalData = {}; 
@@ -254,7 +260,7 @@
 
                     if(periods.length === 0) {
                         document.getElementById("loadingStatus").className = "error-msg";
-                        document.getElementById("loadingStatus").innerHTML = `📭 辨識失敗：所有工作表中皆查無與「${username}」相符的 A 欄帳戶。<br><small style="color:#747d8c; display:block; margin-top:5px;">請確認試算表 A 欄中該帳戶前後是否含有隱形空格，或型態不一致。</small>`;
+                        document.getElementById("loadingStatus").innerHTML = `📭 辨識失敗：所有資料中皆查無與「${username}」相符的帳戶。<br><small style="color:#747d8c; display:block; margin-top:5px;">請確認該帳戶是否存在。</small>`;
                         document.getElementById("studentIdent").innerText = "找不到相符資料";
                         return;
                     }
@@ -289,7 +295,7 @@
             })
             .catch(err => {
                 document.getElementById("loadingStatus").className = "error-msg";
-                document.getElementById("loadingStatus").innerText = "❌ 無法與雲端伺服器建立連線，請檢查 GAS API 網址是否填寫正確並已開放權限。";
+                document.getElementById("loadingStatus").innerText = "❌ 無法與雲端伺服器建立連線，請通報網站管理員。";
             });
     });
 
@@ -298,6 +304,7 @@
         
         // 更新頂部看板
         document.getElementById("pAvg").innerText = report.personalAvg;
+        document.getElementById("cAvg").innerText = report.classTotalAverage || "0"; // 💡 新增：將後端算好的班級總平均塞進 HTML
         document.getElementById("pRank").innerText = `第 ${report.personalRank} 名`;
         document.getElementById("cSize").innerText = `${report.classSize} 人`;
 
@@ -307,57 +314,80 @@
 
         // 遍歷所有科目生成獨立區塊
         for(let subj in report.personalScores) {
-            let myScore = report.personalScores[subj];
+            let rawMyScore = report.personalScores[subj];
             let classAvg = report.classAverages[subj] || 0;
+            // 💡 取得後端傳來的該科標準差，若無則預設為 0
+            let classSD = (report.classSDs && report.classSDs[subj]) ? parseFloat(report.classSDs[subj]) : 0;
             let allScores = report.allSubjectScores[subj] || [];
             
             let diffText = "-";
             let diffClass = "none";
-            
-            if(myScore !== null && myScore !== "尚未輸入") {
-                let diff = (myScore - classAvg).toFixed(1);
-                if(diff > 0) {
-                    diffText = `高於平均 +${diff}`;
-                    diffClass = "up";
-                } else if(diff < 0) {
-                    diffText = `低於平均 ${diff}`;
-                    diffClass = "down";
+            let myScoreDisplay = "尚未輸入";
+            let numericMyScore = null;
+
+            // 確保個人分數有效並轉為數字
+            if(rawMyScore !== null && rawMyScore !== undefined && rawMyScore !== "尚未輸入" && !isNaN(rawMyScore)) {
+                numericMyScore = parseFloat(rawMyScore);
+                myScoreDisplay = numericMyScore;
+
+                if (classSD > 0) {
+                    // 💡 計算 Z 分數 (距離平均值幾個標準差)
+                    let zScore = ((numericMyScore - classAvg) / classSD).toFixed(2);
+                    
+                    if(zScore > 0) {
+                        diffText = `高於平均 +${zScore} 倍標準差`;
+                        diffClass = "up";
+                    } else if(zScore < 0) {
+                        diffText = `低於平均 ${zScore} 倍標準差`;
+                        diffClass = "down";
+                    } else {
+                        diffText = "持平班平均 (+0.00 SD)";
+                    }
                 } else {
-                    diffText = "持平班平均";
+                    // 如果標準差為 0 (例如全班同分，無法計算倍數)
+                    let diff = numericMyScore - classAvg;
+                    if (diff === 0) {
+                        diffText = "持平班平均";
+                    } else {
+                        diffText = "無法計算標準差倍數 (全班分數可能相同)";
+                    }
                 }
-            } else {
-                myScore = "尚未輸入";
             }
 
             // 1. 建立科目卡片容器
             let card = document.createElement("div");
             card.className = "subject-card";
 
-            // 2. 組裝上半部：成績與對比
+            // 💡 格式化標準差顯示文字
+            let sdDisplayHtml = classSD > 0 ? `${classSD.toFixed(2)}` : "無數據/均為同分";
+
+            // 2. 組裝上半部：成績與對比 (將平均值、標準差分行展示，並美化視覺)
             let headerHtml = `
                 <div class="subject-header">
                     <div class="subject-name">${subj}</div>
-                    <div class="subject-score-display">${myScore}</div>
-                    <div style="font-size:0.85rem; color:#64748b;">班級平均: ${classAvg}</div>
-                    <div class="subject-compare ${diffClass}">${diffText}</div>
+                    <div class="subject-score-display">${myScoreDisplay}</div>
+                    <div style="font-size:0.85rem; color:#64748b; margin-top: 5px;">班級平均: <strong>${classAvg}</strong></div>
+                    <div style="font-size:0.85rem; color:#64748b; margin-bottom: 8px;">班級標準差: <strong>${sdDisplayHtml}</strong></div>
+                    <div class="subject-compare ${diffClass}" style="border-top: 1px dotted #cbd5e1; padding-top: 6px; display: inline-block; width: 100%;">${diffText}</div>
                 </div>
             `;
             
-            // 3. 組裝下半部：獨立科目級距長條圖 (級距調整為包含100分)
+            // 3. 定義級距
             const bins = [
-                { label: "100 分", min: 100, max: 101, count: 0 },
-                { label: "90 ~ 99 分", min: 90, max: 100, count: 0 },
-                { label: "80 ~ 89 分", min: 80, max: 90, count: 0 },
-                { label: "70 ~ 79 分", min: 70, max: 80, count: 0 },
-                { label: "60 ~ 69 分", min: 60, max: 70, count: 0 },
-                { label: "60 分以下", min: 0, max: 60, count: 0 }
+                { label: "100 分", check: (s) => s >= 100, count: 0 },
+                { label: "90 ~ 99 分", check: (s) => s >= 90 && s < 100, count: 0 },
+                { label: "80 ~ 89 分", check: (s) => s >= 80 && s < 90, count: 0 },
+                { label: "70 ~ 79 分", check: (s) => s >= 70 && s < 80, count: 0 },
+                { label: "60 ~ 69 分", check: (s) => s >= 60 && s < 70, count: 0 },
+                { label: "60 分以下", check: (s) => s < 60, count: 0 }
             ];
 
             // 計算該科全班在此級距的人數
             allScores.forEach(score => {
-                if (score !== null && !isNaN(score)) {
+                if (score !== null && score !== undefined && !isNaN(score) && score !== "尚未輸入") {
+                    let numScore = parseFloat(score);
                     for(let b of bins) {
-                        if(score >= b.min && score < b.max) {
+                        if(b.check(numScore)) {
                             b.count++;
                             break;
                         }
@@ -367,9 +397,9 @@
 
             // 尋找當前使用者在此科目的落點級距
             let myBinIndex = -1;
-            if (myScore !== null && !isNaN(myScore) && myScore !== "尚未輸入") {
+            if (numericMyScore !== null) {
                 for(let i = 0; i < bins.length; i++) {
-                    if(myScore >= bins[i].min && myScore < bins[i].max) {
+                    if(bins[i].check(numericMyScore)) {
                         myBinIndex = i;
                         break;
                     }
@@ -377,7 +407,7 @@
             }
 
             // 生成長條圖 HTML
-            let distHtml = `<div class="dist-title-inline">📊 全班分數級距分佈 (🟡 為您的落點)</div>`;
+            let distHtml = `<div class="dist-title-inline">全班分數級距分佈 (黃色高光為您的落點)</div>`;
             bins.forEach((b, idx) => {
                 let percentage = report.classSize > 0 ? (b.count / report.classSize) * 100 : 0;
                 let isMyBin = (idx === myBinIndex);
