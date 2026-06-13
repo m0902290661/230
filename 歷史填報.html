@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>114-2 高一 歷史填報系統</title>
+    <link rel="icon" type="png" href="logo.png">
+    <style>
+        .logo {
+            height: 28px;
+            border-radius: 5px;
+        }
+
+        .main {
+            border: solid 1px;
+            border-radius: 5px;
+            padding: 15px;
+            background-color: white;
+            text-align: center;
+            margin-top: 5%;
+            /* 稍微調小一點，避免表單太長超出畫面 */
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main">
+        <img class="logo" src="logo.png" alt="">
+        <h1>114-2 高一 歷史填報系統</h1>
+        <p>目前身份：<span id="stdout">載入中...</span></p>
+
+        <form id="historyForm">
+            <p>行政區</p>
+            <input type="text" name="city" placeholder="縣市" required>
+            <input type="text" name="district" placeholder="鄉鎮區" required>
+            <input type="text" name="village" placeholder="村里" required>
+            <p>廟宇</p>
+            <input type="text" name="temple" placeholder="">
+            <p>小吃</p>
+            <input type="text" name="snack" placeholder="">
+            <p>古蹟</p>
+            <input type="text" name="monument" placeholder="">
+            <br><br>
+            <input type="submit" value="送出">
+        </form>
+        <div id="output" style="margin-top: 15px; color: blue; font-weight: bold;"></div>
+        <p>本系統由許元洧維護 若有問題請<span style="text-decoration: underline; cursor: pointer;"
+                onclick="location.href='問題回報.html'">通報</span></p>
+    </div>
+
+    <script>
+        // 1. 替換成你部署好的 Google GAS 網頁應用程式 URL
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbyjjsgP8YTpZlLtGnzv30rGfP8isV-NjfJ4STdWrPZ0RO8Z5o_-xSCVwlFuJEPSp68Q/exec";
+
+        // 2. 從 localStorage 讀取使用者資訊並顯示
+        const username = localStorage.getItem('username') || '未知帳號';
+        const nickname = localStorage.getItem('nickname') || '訪客';
+        document.getElementById('stdout').innerText = `${nickname} (${username})`;
+
+        // 3. 表單送出事件處理
+        document.getElementById('historyForm').addEventListener('submit', function (e) {
+            e.preventDefault(); // 防止頁面重新整理
+
+            const outputDiv = document.getElementById('output');
+            outputDiv.innerText = "資料傳送中，請稍候...";
+
+            // 建立要傳送的資料物件
+            const formData = new FormData(this);
+            const data = {
+                username: username,
+                nickname: nickname,
+                city: formData.get('city'),
+                district: formData.get('district'),
+                village: formData.get('village'),
+                temple: formData.get('temple'),
+                snack: formData.get('snack'),
+                monument: formData.get('monument')
+            };
+
+            // 使用 fetch API 以 POST 方式傳送到 GAS
+            fetch(GAS_URL, {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {
+                    'Content-Type': 'text/plain;charset=utf-8'
+                }
+            })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.status === 'success') {
+                        outputDiv.style.color = "green";
+                        outputDiv.innerText = "填報成功！感謝您的提供。";
+                        this.reset(); // 清空表單
+                    } else if (result.status === 'duplicate') {
+                        // 重複填報的提示
+                        outputDiv.style.color = "orange";
+                        outputDiv.innerText = result.message;
+                    } else {
+                        outputDiv.style.color = "red";
+                        outputDiv.innerText = "系統錯誤：" + result.message;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    outputDiv.style.color = "red";
+                    outputDiv.innerText = "網路連線失敗，請稍後再試。";
+                });
+        });
+    </script>
+</body>
+
+</html>
