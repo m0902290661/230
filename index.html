@@ -41,7 +41,7 @@
             overflow: hidden;
         }
 
-        /* --- Sidebar --- */
+        /* --- Sidebar 側邊欄 --- */
         .sidebar {
             width: var(--sidebar-width);
             background-color: var(--dark-color);
@@ -125,7 +125,7 @@
             background-color: #c0392b;
         }
 
-        /* --- Main Content --- */
+        /* --- Main Content 主要內容區 --- */
         .main-wrapper {
             flex-grow: 1;
             display: flex;
@@ -204,7 +204,6 @@
             gap: 20px;
         }
 
-        /* 快捷卡片樣式 */
         .feature-card {
             background: white;
             padding: 25px;
@@ -231,7 +230,7 @@
             margin-bottom: 15px;
         }
 
-        /* 公共組件 */
+        /* --- 公用元件 --- */
         .section-title {
             font-size: 24px;
             color: var(--dark-color);
@@ -244,11 +243,11 @@
         .loading-text {
             text-align: center;
             color: #888;
-            padding: 20px;
+            padding: 40px 20px;
             font-size: 16px;
         }
 
-        /* 💡 新增：課程資源網格與卡片外觀 */
+        /* --- 課程資源網格與卡片外觀 --- */
         .resources-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -340,7 +339,13 @@
             border-color: var(--primary-color);
         }
 
-        /* 訊息清單共用外觀 */
+        /* 關鍵字輸入框聚焦外觀 */
+        #resourceSearchInput:focus {
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 8px rgba(52, 152, 219, 0.2);
+        }
+
+        /* --- 訊息清單排版 --- */
         .msg-list {
             display: flex;
             flex-direction: column;
@@ -386,7 +391,7 @@
             border-left: 4px solid #9b59b6;
         }
 
-        /* 常用連結網格與卡片樣式 */
+        /* --- 常用連結樣式 --- */
         .links-title {
             font-size: 20px;
             color: var(--dark-color);
@@ -485,11 +490,10 @@
                 <div class="welcome-card">
                     <h1>嗨，<span id="nameDisplay" style="color: var(--primary-color);"></span>！</h1>
                     <p>歡迎來到高一智班務系統。請點選下方功能卡片或常用連結開始使用。</p>
-                    <p>本系統由 許元洧 維護，若有問題請 <a style="color: black;text-decoration: none;text-decoration: underline;" href="問題回報.html">通報</a></p>
+                    <p>本系統由 許元洧 維護，若有問題請 <a style="color: black;text-decoration: underline;" href="問題回報.html">通報</a></p>
                 </div>
 
                 <div class="features-grid">
-
                     <div class="feature-card" onclick="window.location.href='成績查詢.html'">
                         <i class="fa-solid fa-chart-line" style="color:var(--purple-color);"></i>
                         <h3>成績查詢系統</h3>
@@ -525,7 +529,6 @@
                         <h3>歷史填報系統</h3>
                         <p>114-2 高一 歷史填報系統</p>
                     </div>
-
                 </div>
 
                 <h3 class="links-title"><i class="fa-solid fa-link" style="color:var(--primary-color);"></i> 學校與班級常用連結</h3>
@@ -560,7 +563,17 @@
             </section>
 
             <section id="resourcesSection" class="page-section">
-                <h2 class="section-title"><i class="fa-solid fa-globe" style="color: #1abc9c;"></i> 學習網站與課程資源</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
+                    <h2 class="section-title" style="margin-bottom: 0;"><i class="fa-solid fa-globe" style="color: #1abc9c;"></i> 學習網站與課程資源</h2>
+                    
+                    <div class="search-box-wrapper" style="position: relative; min-width: 280px; max-width: 100%; flex-grow: 1; display: flex; justify-content: flex-end;">
+                        <i class="fa-solid fa-magnifying-glass" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #aaa; pointer-events: none;"></i>
+                        <input type="text" id="resourceSearchInput" placeholder="輸入關鍵字搜尋（如：文法、動詞、網站名）..." 
+                               style="width: 100%; max-width: 400px; padding: 10px 40px 10px 15px; border: 1px solid var(--border-color); border-radius: 20px; font-size: 14px; outline: none; transition: all 0.2s;"
+                               oninput="filterResources()">
+                    </div>
+                </div>
+                
                 <div id="resourcesContainer"><div class="loading-text">學習資源載入中...</div></div>
             </section>
 
@@ -572,6 +585,7 @@
     <script>
         let gasUrl = "";
         let currentUserName = "";
+        let allResourcesData = []; // 存放所有向 GAS 撈回來的課程資源原始陣列
 
         window.onload = function () {
             const isLoggedIn = localStorage.getItem("isLoggedIn");
@@ -589,19 +603,20 @@
             document.getElementById("navNameDisplay").textContent = `${nickname} (${username})`;
             document.getElementById("avatarDisplay").textContent = nickname.charAt(0);
 
+            // 讀取外部 API 設定檔
             fetch('api.json')
                 .then(res => res.json())
                 .then(config => {
                     gasUrl = config.GAS_WEB_APP_URL;
-                    // 預載基本資料
+                    // 初始化時背景默默預載基本資料，避免切換時白屏過久
                     loadAnnouncements();
                     loadPrivateMessages();
-                    loadCourseResources(); // 💡 預載資源
+                    loadCourseResources(); 
                 })
                 .catch(err => console.error("設定檔讀取失敗", err));
         };
 
-        // 選單切換監聽
+        // 側邊欄選單點擊事件監聽
         const menuItems = document.querySelectorAll('#menuList li');
         menuItems.forEach(item => {
             item.addEventListener('click', function () {
@@ -610,7 +625,7 @@
             });
         });
 
-        // 頁面切換控制
+        // 核心切換頁面機制
         function switchPage(targetSectionId) {
             if (!targetSectionId) return;
 
@@ -623,14 +638,15 @@
             const targetSection = document.getElementById(targetSectionId);
             if (targetSection) targetSection.classList.add('active');
 
-            // 聯動更新資料
+            // 切換時即時向後端或快取同步資料
             if (targetSectionId === 'announcementSection') loadAnnouncements();
             if (targetSectionId === 'privateMsgSection') loadPrivateMessages();
-            if (targetSectionId === 'resourcesSection') loadCourseResources(); // 💡 點擊切換時動態更新
+            if (targetSectionId === 'resourcesSection') loadCourseResources(); 
+            
             if (window.innerWidth <= 768) toggleSidebar();
         }
 
-        // 載入公開公告
+        // 撈取公開公告
         function loadAnnouncements() {
             if (!gasUrl) return;
             const container = document.getElementById('announcementContainer');
@@ -664,7 +680,7 @@
             }).catch(err => container.innerHTML = '<div class="loading-text">連線失敗</div>');
         }
 
-        // 載入個人私人訊息
+        // 撈取專屬私訊
         function loadPrivateMessages() {
             if (!gasUrl || !currentUserName) return;
             const container = document.getElementById('privateMsgContainer');
@@ -703,10 +719,14 @@
             .catch(err => { container.innerHTML = '<div class="loading-text" style="color:red;">連線失敗。</div>'; });
         }
 
-        // 💡 新增：向 GAS 請求並撈取「課程資源」資料與渲染
+        // 撈取課程網站資源
         function loadCourseResources() {
             if (!gasUrl) return;
             const container = document.getElementById('resourcesContainer');
+
+            // 每次重新切換或點進此分頁，將上一次的搜尋欄內容重置
+            const searchInput = document.getElementById('resourceSearchInput');
+            if(searchInput) searchInput.value = "";
 
             fetch(gasUrl, {
                 method: "POST",
@@ -717,32 +737,8 @@
             .then(res => res.json())
             .then(resData => {
                 if (resData.status === "success") {
-                    const list = resData.data;
-                    if (list.length === 0) {
-                        container.innerHTML = '<div class="loading-text"><i class="fa-solid fa-folder-open"></i> 目前尚未上傳任何課程網站資源。</div>';
-                        return;
-                    }
-
-                    let html = '<div class="resources-grid">';
-                    list.forEach(item => {
-                        html += `
-                    <div class="resource-item-card">
-                        <div class="resource-main">
-                            <div class="resource-icon-box">
-                                <i class="fa-solid ${item.icon}"></i>
-                            </div>
-                            <div class="resource-detail">
-                                <span class="resource-tag">${item.category}</span>
-                                <h3>${item.name}</h3>
-                                <p>${item.description || '點擊下方按鈕前往該網站學習。'}</p>
-                            </div>
-                        </div>
-                        <a href="${item.url}" target="_blank" class="resource-action-btn">
-                            <i class="fa-solid fa-arrow-up-right-from-square"></i> 前往資源網站
-                        </a>
-                    </div>`;
-                    });
-                    container.innerHTML = html + '</div>';
+                    allResourcesData = resData.data; // 儲存至全域變數，供搜尋功能使用
+                    renderResources(allResourcesData); // 渲染生成 HTML 卡片
                 } else {
                     container.innerHTML = `<div class="loading-text" style="color:red;">資源載入失敗</div>`;
                 }
@@ -753,7 +749,59 @@
             });
         }
 
-        // 行動裝置側邊欄控制
+        // 純粹將資料陣列輸出轉換為網頁 DOM 的功能
+        function renderResources(list) {
+            const container = document.getElementById('resourcesContainer');
+            
+            if (list.length === 0) {
+                container.innerHTML = '<div class="loading-text"><i class="fa-solid fa-folder-open"></i> 沒有找到符合關鍵字的課程資源。</div>';
+                return;
+            }
+
+            let html = '<div class="resources-grid">';
+            list.forEach(item => {
+                html += `
+            <div class="resource-item-card">
+                <div class="resource-main">
+                    <div class="resource-icon-box">
+                        <i class="fa-solid ${item.icon}"></i>
+                    </div>
+                    <div class="resource-detail">
+                        <span class="resource-tag">${item.category}</span>
+                        <h3>${item.name}</h3>
+                        <p>${item.description || '點擊下方按鈕前往該網站學習。'}</p>
+                    </div>
+                </div>
+                <a href="${item.url}" target="_blank" class="resource-action-btn">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> 前往資源網站
+                </a>
+            </div>`;
+            });
+            container.innerHTML = html + '</div>';
+        }
+
+        // 前端即時過濾關鍵字
+        function filterResources() {
+            const keyword = document.getElementById('resourceSearchInput').value.toLowerCase().trim();
+            
+            if (keyword === "") {
+                renderResources(allResourcesData);
+                return;
+            }
+
+            // 支援科目、標題、簡介描述進行三合一全方位模糊比對
+            const filtered = allResourcesData.filter(item => {
+                const categoryMatch = item.category.toLowerCase().includes(keyword);
+                const nameMatch = item.name.toLowerCase().includes(keyword);
+                const descMatch = item.description.toLowerCase().includes(keyword);
+                
+                return categoryMatch || nameMatch || descMatch;
+            });
+
+            renderResources(filtered);
+        }
+
+        // RWD 行動裝置側邊選單切換開關
         const sidebar = document.getElementById('sidebar');
         const menuToggle = document.getElementById('menuToggle');
         const overlay = document.getElementById('sidebarOverlay');
@@ -764,7 +812,7 @@
         menuToggle.addEventListener('click', toggleSidebar);
         overlay.addEventListener('click', toggleSidebar);
 
-        // 登出
+        // 登出流程
         document.getElementById("logoutBtn").addEventListener("click", function () {
             localStorage.clear();
             alert("您已成功登出。");
