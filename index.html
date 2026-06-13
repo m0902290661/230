@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 
 <head>
-    <link rel="icon" type="png" href="logo.png">
+    <link rel="icon" type="image/png" href="logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>高一智班務系統</title>
@@ -18,6 +18,12 @@
             --light-bg: #f8f9fa;
             --text-color: #333;
             --border-color: #e0e0e0;
+            
+            --purple-color: #9b59b6;
+            --orange-color: #e67e22;
+            --red-color: #e74c3c;
+            --green-color: #2ecc71;
+            --teal-color: #1abc9c;
         }
 
         * {
@@ -218,6 +224,12 @@
             font-size: 40px;
             margin-bottom: 15px;
         }
+        
+        .feature-card img {
+            height: 40px;
+            object-fit: contain;
+            margin-bottom: 15px;
+        }
 
         /* 公共組件 */
         .section-title {
@@ -236,7 +248,99 @@
             font-size: 16px;
         }
 
-        /* 訊息清單共用外觀 (公告與私訊通用) */
+        /* 💡 新增：課程資源網格與卡片外觀 */
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .resource-item-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+        }
+
+        .resource-item-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border-color: var(--primary-color);
+        }
+
+        .resource-main {
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .resource-icon-box {
+            width: 45px;
+            height: 45px;
+            background-color: #f0f3f6;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .resource-tag {
+            display: inline-block;
+            background-color: #e8f4fd;
+            color: var(--primary-color);
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+
+        .resource-detail h3 {
+            font-size: 16px;
+            color: var(--dark-color);
+            margin-bottom: 5px;
+        }
+
+        .resource-detail p {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .resource-action-btn {
+            width: 100%;
+            padding: 8px;
+            background-color: #f8f9fa;
+            border: 1px solid var(--border-color);
+            color: var(--dark-color);
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .resource-action-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        /* 訊息清單共用外觀 */
         .msg-list {
             display: flex;
             flex-direction: column;
@@ -278,12 +382,11 @@
             white-space: pre-line;
         }
 
-        /* 私人訊息框特別點綴 */
         .msg-item.private-style {
             border-left: 4px solid #9b59b6;
         }
 
-        /* 💡 新增：常用連結網格與卡片樣式 */
+        /* 常用連結網格與卡片樣式 */
         .links-title {
             font-size: 20px;
             color: var(--dark-color);
@@ -334,34 +437,12 @@
         }
 
         @media (max-width: 768px) {
-            body {
-                flex-direction: column;
-            }
-
-            .sidebar {
-                position: fixed;
-                left: calc(-1 * var(--sidebar-width));
-                top: 0;
-                bottom: 0;
-                width: var(--sidebar-width);
-                height: 100vh;
-            }
-
-            .sidebar.active {
-                left: 0;
-            }
-
-            .menu-toggle {
-                display: block;
-            }
-
-            .top-navbar {
-                padding: 0 20px;
-            }
-
-            .content-container {
-                padding: 20px;
-            }
+            body { flex-direction: column; }
+            .sidebar { position: fixed; left: calc(-1 * var(--sidebar-width)); top: 0; bottom: 0; width: var(--sidebar-width); height: 100vh; }
+            .sidebar.active { left: 0; }
+            .menu-toggle { display: block; }
+            .top-navbar { padding: 0 20px; }
+            .content-container { padding: 20px; }
         }
     </style>
 </head>
@@ -377,14 +458,13 @@
             <li class="active" data-target="homeSection"><a><i class="fa-solid fa-house"></i>系統首頁</a></li>
             <li data-target="announcementSection"><a><i class="fa-solid fa-bullhorn"></i>班級公告欄</a></li>
             <li data-target="privateMsgSection"><a><i class="fa-solid fa-envelope-open-text"></i>個人私人訊息</a></li>
+            <li data-target="resourcesSection"><a><i class="fa-solid fa-globe" style="color:#1abc9c;"></i>課程網站資源</a></li>
             <li onclick="window.open('https://classvideos.huatingtea.com', '_blank')">
                 <a><i class="fa-solid fa-video" style="color: #e74c3c;"></i>課程影音</a>
             </li>
-            <li onclick="window.location.href='成績查詢.html'"><a><i class="fa-solid fa-square-poll-vertical"></i>成績查詢系統</a>
-            </li>
-            <li onclick="window.location.href='問題回報.html'"><a><i class="fa-solid fa-triangle-exclamation"
-                        style="color:#e67e22;"></i>問題與意見回報</a></li>
-            </ul>
+            <li onclick="window.location.href='成績查詢.html'"><a><i class="fa-solid fa-square-poll-vertical"></i>成績查詢系統</a></li>
+            <li onclick="window.location.href='問題回報.html'"><a><i class="fa-solid fa-triangle-exclamation" style="color:#e67e22;"></i>問題與意見回報</a></li>
+        </ul>
         <div class="sidebar-footer">
             <button class="logout-btn" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i>登出系統</button>
         </div>
@@ -428,90 +508,70 @@
                         <p>查看老師發送給您個人的私密重要通知</p>
                     </div>
 
+                    <div class="feature-card" onclick="switchPage('resourcesSection')">
+                        <i class="fa-solid fa-globe" style="color:var(--teal-color);"></i>
+                        <h3>課程網站資源</h3>
+                        <p>整合推薦的各科線上學習、題庫與輔助教學網站</p>
+                    </div>
+
                     <div class="feature-card" onclick="window.open('https://classvideos.huatingtea.com', '_blank')">
                         <i class="fa-solid fa-video" style="color:var(--red-color);"></i>
                         <h3>課程影音</h3>
                         <p>跳轉至線上課程補課與影音複習系統</p>
                     </div>
 
-                    <div style="background-color: yellow;" class="feature-card" onclick="window.location.href='歷史填報.html'">
-                        <img style="height: 40px;margin: 5px;" src="多拉.png" alt="">
+                    <div style="background-color: #fffde7;" class="feature-card" onclick="window.location.href='歷史填報.html'">
+                        <img src="多拉.png" alt="Dora" onerror="this.style.display='none';">
                         <h3>歷史填報系統</h3>
                         <p>114-2 高一 歷史填報系統</p>
                     </div>
 
                 </div>
 
-                <h3 class="links-title"><i class="fa-solid fa-link" style="color:var(--primary-color);"></i> 學校與班級常用連結
-                </h3>
+                <h3 class="links-title"><i class="fa-solid fa-link" style="color:var(--primary-color);"></i> 學校與班級常用連結</h3>
                 <div class="links-grid">
-
                     <div class="link-card" onclick="window.open('https://students-in-233.blogspot.com/', '_blank')">
                         <i class="fa-solid fa-blog" style="color:#1abc9c;"></i>
-                        <div class="link-info">
-                            <h4>班導網站</h4>
-                            <p>班級專屬部落格</p>
-                        </div>
+                        <div class="link-info"><h4>班導網站</h4><p>班級專屬部落格</p></div>
                     </div>
-
-                    <div class="link-card"
-                        onclick="window.open('https://drive.google.com/drive/folders/1l7hrZyXuTcaywCCqOtI5B-mBNfO9xMkO', '_blank')">
+                    <div class="link-card" onclick="window.open('https://drive.google.com/drive/folders/1l7hrZyXuTcaywCCqOtI5B-mBNfO9xMkO', '_blank')">
                         <i class="fa-brands fa-google-drive" style="color:var(--green-color);"></i>
-                        <div class="link-info">
-                            <h4>歷程雲端</h4>
-                            <p>學習歷程檔案資料夾</p>
-                        </div>
+                        <div class="link-info"><h4>歷程雲端</h4><p>學習歷程檔案資料夾</p></div>
                     </div>
-
                     <div class="link-card" onclick="window.open('https://portal.k12.ntut.edu.tw/', '_blank')">
                         <i class="fa-solid fa-graduation-cap" style="color:var(--primary-color);"></i>
-                        <div class="link-info">
-                            <h4>校務系統</h4>
-                            <p>國教署智慧校務平台</p>
-                        </div>
+                        <div class="link-info"><h4>校務系統</h4><p>國教署智慧校務平台</p></div>
                     </div>
-
                     <div class="link-card" onclick="window.open('http://www.holdmean.org.tw/', '_blank')">
                         <i class="fa-solid fa-school" style="color:var(--orange-color);"></i>
-                        <div class="link-info">
-                            <h4>弘明校網</h4>
-                            <p>弘明實驗高級中學官網</p>
-                        </div>
+                        <div class="link-info"><h4>弘明校網</h4><p>弘明實驗高級中學官網</p></div>
                     </div>
-
                 </div>
             </section>
 
             <section id="announcementSection" class="page-section">
                 <h2 class="section-title"><i class="fa-solid fa-bullhorn" style="color: #e67e22;"></i> 班級最新公告</h2>
-                <div id="announcementContainer">
-                    <div class="loading-text">公告載入中...</div>
-                </div>
+                <div id="announcementContainer"><div class="loading-text">公告載入中...</div></div>
             </section>
 
             <section id="privateMsgSection" class="page-section">
-                <h2 class="section-title"><i class="fa-solid fa-envelope-open-text" style="color: #9b59b6;"></i> 個人專屬訊息
-                </h2>
-                <div id="privateMsgContainer">
-                    <div class="loading-text">訊息安全載入中...</div>
-                </div>
+                <h2 class="section-title"><i class="fa-solid fa-envelope-open-text" style="color: #9b59b6;"></i> 個人專屬訊息</h2>
+                <div id="privateMsgContainer"><div class="loading-text">訊息安全載入中...</div></div>
             </section>
 
-            <section id="timetableSection" class="page-section">
-                <h2 class="section-title">功課表查詢</h2>
-                <div class="feature-card" style="cursor:default;">功能開發中...</div>
+            <section id="resourcesSection" class="page-section">
+                <h2 class="section-title"><i class="fa-solid fa-globe" style="color: #1abc9c;"></i> 學習網站與課程資源</h2>
+                <div id="resourcesContainer"><div class="loading-text">學習資源載入中...</div></div>
             </section>
 
         </main>
     </div>
 
-    <div id="sidebarOverlay"
-        style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.4); z-index:90;">
-    </div>
+    <div id="sidebarOverlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.4); z-index:90;"></div>
 
     <script>
         let gasUrl = "";
-        let currentUserName = ""; // 儲存目前帳號，用於向後端請求私訊
+        let currentUserName = "";
 
         window.onload = function () {
             const isLoggedIn = localStorage.getItem("isLoggedIn");
@@ -533,37 +593,40 @@
                 .then(res => res.json())
                 .then(config => {
                     gasUrl = config.GAS_WEB_APP_URL;
-                    // 預載資料
+                    // 預載基本資料
                     loadAnnouncements();
                     loadPrivateMessages();
+                    loadCourseResources(); // 💡 預載資源
                 })
                 .catch(err => console.error("設定檔讀取失敗", err));
         };
 
-        // 選單切換點擊事件
+        // 選單切換監聽
         const menuItems = document.querySelectorAll('#menuList li');
         menuItems.forEach(item => {
             item.addEventListener('click', function () {
                 const target = this.getAttribute('data-target');
-                switchPage(target);
+                if (target) switchPage(target);
             });
         });
 
-        // 封裝切換頁面功能（讓首頁點擊卡片也能連動）
+        // 頁面切換控制
         function switchPage(targetSectionId) {
-            // 更新選單高亮
+            if (!targetSectionId) return;
+
             menuItems.forEach(i => {
                 if (i.getAttribute('data-target') === targetSectionId) i.classList.add('active');
                 else i.classList.remove('active');
             });
 
-            // 切換 Section
             document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
-            document.getElementById(targetSectionId).classList.add('active');
+            const targetSection = document.getElementById(targetSectionId);
+            if (targetSection) targetSection.classList.add('active');
 
-            // 觸發對應資料更新
+            // 聯動更新資料
             if (targetSectionId === 'announcementSection') loadAnnouncements();
             if (targetSectionId === 'privateMsgSection') loadPrivateMessages();
+            if (targetSectionId === 'resourcesSection') loadCourseResources(); // 💡 點擊切換時動態更新
             if (window.innerWidth <= 768) toggleSidebar();
         }
 
@@ -577,31 +640,31 @@
                 headers: { "Content-Type": "text/plain" },
                 body: JSON.stringify({ action: "getAnnouncements" })
             })
-                .then(res => res.json())
-                .then(resData => {
-                    if (resData.status === "success") {
-                        const list = resData.data;
-                        if (list.length === 0) { container.innerHTML = '<div class="loading-text">目前尚無任何班級公告。</div>'; return; }
-                        let html = '<div class="msg-list">';
-                        list.forEach(item => {
-                            html += `
-                        <div class="msg-item">
-                            <div class="msg-header">
-                                <div class="msg-title">${item.title}</div>
-                                <div class="msg-meta">
-                                    <span><i class="fa-solid fa-calendar"></i> ${item.date}</span>
-                                    <span><i class="fa-solid fa-user"></i> ${item.author}</span>
-                                </div>
+            .then(res => res.json())
+            .then(resData => {
+                if (resData.status === "success") {
+                    const list = resData.data;
+                    if (list.length === 0) { container.innerHTML = '<div class="loading-text">目前尚無任何班級公告。</div>'; return; }
+                    let html = '<div class="msg-list">';
+                    list.forEach(item => {
+                        html += `
+                    <div class="msg-item">
+                        <div class="msg-header">
+                            <div class="msg-title">${item.title}</div>
+                            <div class="msg-meta">
+                                <span><i class="fa-solid fa-calendar"></i> ${item.date}</span>
+                                <span><i class="fa-solid fa-user"></i> ${item.author}</span>
                             </div>
-                            <div class="msg-content">${item.content}</div>
-                        </div>`;
-                        });
-                        container.innerHTML = html + '</div>';
-                    } else { container.innerHTML = `<div class="loading-text" style="color:red;">載入失敗</div>`; }
-                }).catch(err => container.innerHTML = '<div class="loading-text">連線失敗</div>');
+                        </div>
+                        <div class="msg-content">${item.content}</div>
+                    </div>`;
+                    });
+                    container.innerHTML = html + '</div>';
+                } else { container.innerHTML = `<div class="loading-text" style="color:red;">載入失敗</div>`; }
+            }).catch(err => container.innerHTML = '<div class="loading-text">連線失敗</div>');
         }
 
-        // 💡 載入個人私人訊息
+        // 載入個人私人訊息
         function loadPrivateMessages() {
             if (!gasUrl || !currentUserName) return;
             const container = document.getElementById('privateMsgContainer');
@@ -610,46 +673,87 @@
                 method: "POST",
                 mode: "cors",
                 headers: { "Content-Type": "text/plain" },
-                body: JSON.stringify({
-                    action: "getPrivateMessages",
-                    username: currentUserName // 將目前學生帳號送去給後端篩選
-                })
+                body: JSON.stringify({ action: "getPrivateMessages", username: currentUserName })
             })
-                .then(res => res.json())
-                .then(resData => {
-                    if (resData.status === "success") {
-                        const list = resData.data;
-                        if (list.length === 0) {
-                            container.innerHTML = '<div class="loading-text"><i class="fa-solid fa-comment-slash"></i> 目前沒有給您的私人訊息。</div>';
-                            return;
-                        }
-
-                        let html = '<div class="msg-list">';
-                        list.forEach(item => {
-                            html += `
-                        <div class="msg-item private-style">
-                            <div class="msg-header">
-                                <div class="msg-title" style="color:#8e44ad;"><i class="fa-solid fa-user-lock"></i> ${item.title}</div>
-                                <div class="msg-meta">
-                                    <span><i class="fa-solid fa-calendar"></i> ${item.date}</span>
-                                    <span><i class="fa-solid fa-paper-plane"></i> 來自：${item.sender}</span>
-                                </div>
-                            </div>
-                            <div class="msg-content">${item.content}</div>
-                        </div>`;
-                        });
-                        container.innerHTML = html + '</div>';
-                    } else {
-                        container.innerHTML = `<div class="loading-text" style="color:red;">載入失敗：${resData.message}</div>`;
+            .then(res => res.json())
+            .then(resData => {
+                if (resData.status === "success") {
+                    const list = resData.data;
+                    if (list.length === 0) {
+                        container.innerHTML = '<div class="loading-text"><i class="fa-solid fa-comment-slash"></i> 目前沒有給您的私人訊息。</div>';
+                        return;
                     }
-                })
-                .catch(err => {
-                    console.error(err);
-                    container.innerHTML = '<div class="loading-text" style="color:red;">連線失敗。</div>';
-                });
+                    let html = '<div class="msg-list">';
+                    list.forEach(item => {
+                        html += `
+                    <div class="msg-item private-style">
+                        <div class="msg-header">
+                            <div class="msg-title" style="color:#8e44ad;"><i class="fa-solid fa-user-lock"></i> ${item.title}</div>
+                            <div class="msg-meta">
+                                <span><i class="fa-solid fa-calendar"></i> ${item.date}</span>
+                                <span><i class="fa-solid fa-paper-plane"></i> 來自：${item.sender}</span>
+                            </div>
+                        </div>
+                        <div class="msg-content">${item.content}</div>
+                    </div>`;
+                    });
+                    container.innerHTML = html + '</div>';
+                } else { container.innerHTML = `<div class="loading-text" style="color:red;">載入失敗：${resData.message}</div>`; }
+            })
+            .catch(err => { container.innerHTML = '<div class="loading-text" style="color:red;">連線失敗。</div>'; });
         }
 
-        // 手機版選單
+        // 💡 新增：向 GAS 請求並撈取「課程資源」資料與渲染
+        function loadCourseResources() {
+            if (!gasUrl) return;
+            const container = document.getElementById('resourcesContainer');
+
+            fetch(gasUrl, {
+                method: "POST",
+                mode: "cors",
+                headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify({ action: "getCourseResources" })
+            })
+            .then(res => res.json())
+            .then(resData => {
+                if (resData.status === "success") {
+                    const list = resData.data;
+                    if (list.length === 0) {
+                        container.innerHTML = '<div class="loading-text"><i class="fa-solid fa-folder-open"></i> 目前尚未上傳任何課程網站資源。</div>';
+                        return;
+                    }
+
+                    let html = '<div class="resources-grid">';
+                    list.forEach(item => {
+                        html += `
+                    <div class="resource-item-card">
+                        <div class="resource-main">
+                            <div class="resource-icon-box">
+                                <i class="fa-solid ${item.icon}"></i>
+                            </div>
+                            <div class="resource-detail">
+                                <span class="resource-tag">${item.category}</span>
+                                <h3>${item.name}</h3>
+                                <p>${item.description || '點擊下方按鈕前往該網站學習。'}</p>
+                            </div>
+                        </div>
+                        <a href="${item.url}" target="_blank" class="resource-action-btn">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> 前往資源網站
+                        </a>
+                    </div>`;
+                    });
+                    container.innerHTML = html + '</div>';
+                } else {
+                    container.innerHTML = `<div class="loading-text" style="color:red;">資源載入失敗</div>`;
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                container.innerHTML = '<div class="loading-text" style="color:red;">連線失敗，無法取得資源。</div>';
+            });
+        }
+
+        // 行動裝置側邊欄控制
         const sidebar = document.getElementById('sidebar');
         const menuToggle = document.getElementById('menuToggle');
         const overlay = document.getElementById('sidebarOverlay');
