@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>115-1 高二智 成績查詢系統</title>
+    <link rel="icon" type="png" href="logo.png">
+    <style>
+        body {
+            background-color: rgb(207, 205, 205);
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        header {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        header h1 {
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        header img {
+            height: 28px;
+            border-radius: 5px;
+            vertical-align: middle;
+        }
+
+        header a {
+            text-decoration: none;
+            color: white;
+            background-color: black;
+            border-radius: 5px;
+            padding: 5px 10px;
+            display: inline-block;
+            margin-top: 5px;
+        }
+
+        main {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 60vh;
+        }
+
+        main div.card {
+            padding: 20px;
+            margin: 5px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 950px;
+        }
+
+        .login, .firstlogin, .findpassword, .sysm {
+            display: none;
+        }
+
+        input[type="text"], input[type="password"], input[type="email"], select {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0 15px 0;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        input[type="submit"], button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        input[type="submit"]:hover, button:hover {
+            background-color: #45a049;
+        }
+
+        .login a {
+            float: right;
+            margin-top: 10px;
+            color: #666;
+            text-decoration: none;
+        }
+
+        .sysm button {
+            background-color: #f44336;
+            margin-left: 10px;
+        }
+
+        .score-container {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 25px;
+            background: #fff;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        /* 學生個人單科落點級距高光 */
+        .student-placement-cell {
+            background-color: #ffeb3b !important; 
+            font-weight: bold;
+            color: #d32f2f; 
+            border: 2px solid #fbc02d !important;
+        }
+
+        /* 班平均列專用樣式 */
+        .class-average-row {
+            background-color: #e8f5e9;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+
+        .legend-box {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            background-color: #ffeb3b;
+            border: 1px solid #fbc02d;
+            vertical-align: middle;
+            margin-right: 5px;
+        }
+
+        h3 {
+            border-left: 4px solid #4CAF50;
+            padding-left: 8px;
+            margin-top: 20px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 14px;
+        }
+
+        footer a {
+            text-decoration: underline;
+            color: black;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <img src="logo.png" alt="">
+        <h1>115-1 高二智 成績查詢系統</h1>
+        <a href="index.html">⌫ 返回系統</a>
+    </header>
+
+    <main>
+        <div class="login card">
+            <h2>家長登入</h2>
+            <form id="loginForm">
+                <p>學號</p>
+                <input type="text" placeholder="4930xx" required>
+                <p>密碼</p>
+                <input type="password" placeholder="password" required>
+                <br><br>
+                <input type="submit" value="送出">
+                <a href="#" id="toForgotPassword">忘記密碼</a>
+            </form>
+        </div>
+
+        <div class="firstlogin card">
+            <h2><span id="passTitle">首次登入</span> 更改密碼</h2>
+            <p>為保證帳戶安全 請更改密碼</p>
+            <form id="changePasswordForm">
+                <p>新密碼</p>
+                <input type="password" placeholder="password" required>
+                <p>確認密碼</p>
+                <input type="password" placeholder="password" required>
+                <p>綁定電子郵件</p>
+                <input type="email" placeholder="example@mail.com">
+                <br><br>
+                <input type="submit" value="更改">
+            </form>
+        </div>
+
+        <div class="findpassword card">
+            <h2>忘記密碼</h2>
+            <form id="sendEmailForm">
+                <p>請輸入學號</p>
+                <input type="text" placeholder="4930xx" required>
+                <input type="submit" value="發送驗證信至信箱">
+            </form>
+            <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+            <form id="verifyCodeForm">
+                <p>輸入驗證碼</p>
+                <input type="text" placeholder="xxxx" required>
+                <input type="submit" value="驗證">
+            </form>
+            <br>
+            <a href="#" id="backToLogin" style="color: #666; text-decoration: none;">← 返回登入</a>
+        </div>
+
+        <div class="sysm card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <p>目前身份：<span id="currentIdentity" style="font-weight: bold;">等待中...</span></p>
+                <button id="logoutBtn">登出</button>
+            </div>
+            <p>
+                欲查詢之項目：
+                <select id="subjectSelect">
+                    <option value="">請選擇</option>
+                </select>
+            </p>
+            <div class="score-container" id="scoreDisplay">
+                <p>等待中...</p>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>本系統由許元洧維護 若有問題請<a href="問題通報.html">通報</a></p>
+    </footer>
+
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbzRK31k20n3UNzzkU2s1a5ZsN_s1dhOiJZ5lfh62Y2-iI5yfSbw8MOKGaEtcrg7A9HiOA/exec"; // ⚠️ 請務必替換成你的最新 GAS 部署網址
+
+        const viewLogin = document.querySelector('.login');
+        const viewFirstLogin = document.querySelector('.firstlogin');
+        const viewFindPassword = document.querySelector('.findpassword');
+        const viewSysm = document.querySelector('.sysm');
+
+        const txtIdentity = document.getElementById('currentIdentity');
+        const selectSubject = document.getElementById('subjectSelect');
+        const divScoreDisplay = document.getElementById('scoreDisplay');
+        const btnLogout = document.getElementById('logoutBtn');
+        const lblPassTitle = document.getElementById('passTitle');
+
+        function switchView(targetView) {
+            viewLogin.style.display = 'none';
+            viewFirstLogin.style.display = 'none';
+            viewFindPassword.style.display = 'none';
+            viewSysm.style.display = 'none';
+            if (targetView) targetView.style.display = 'block';
+        }
+
+        function initSystem() {
+            const username = localStorage.getItem('username');
+            const nickname = localStorage.getItem('nickname');
+            if (username && nickname) {
+                enterSystem(username, nickname);
+            } else {
+                switchView(viewLogin);
+            }
+        }
+
+        function enterSystem(username, nickname) {
+            txtIdentity.textContent = `${nickname} (${username})`;
+            switchView(viewSysm);
+            fetchSubjects();
+        }
+
+        function fetchSubjects() {
+            selectSubject.innerHTML = '<option value="">項目載入中...</option>';
+            fetch(`${API_URL}?action=getSubjects`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        selectSubject.innerHTML = '<option value="">請選擇查詢項目</option>';
+                        data.subjects.forEach(sub => {
+                            const opt = document.createElement('option');
+                            opt.value = sub;
+                            opt.textContent = sub;
+                            selectSubject.appendChild(opt);
+                        });
+                    } else {
+                        selectSubject.innerHTML = '<option value="">無法載入項目</option>';
+                    }
+                })
+                .catch(() => selectSubject.innerHTML = '<option value="">網路連線錯誤</option>');
+        }
+
+        selectSubject.addEventListener('change', function () {
+            const subject = this.value;
+            const username = localStorage.getItem('username');
+            if (!subject) {
+                divScoreDisplay.innerHTML = '<p>等待中...</p>';
+                return;
+            }
+            divScoreDisplay.innerHTML = '<p>數據分析中，請稍候...</p>';
+
+            fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'getFullSheet', username: username, subject: subject })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.nickname) {
+                        localStorage.setItem('nickname', data.nickname);
+                        txtIdentity.textContent = `${data.nickname} (${username})`;
+                    }
+                    
+                    const personalScore = data.scores;
+                    const originalKeys = Object.keys(personalScore);
+                    
+                    const frontKeys = [];
+                    if (originalKeys.includes("帳號")) frontKeys.push("帳號");
+                    if (originalKeys.includes("姓名")) frontKeys.push("姓名");
+                    if (originalKeys.includes("座號")) frontKeys.push("座號");
+                    const backKeys = originalKeys.filter(k => !frontKeys.includes(k));
+                    const orderedKeys = [...frontKeys, ...backKeys];
+
+                    let pTableHtml = '<h3>個人成績查詢結果</h3>';
+                    pTableHtml += '<table><thead><tr>';
+                    orderedKeys.forEach(key => {
+                        pTableHtml += `<th>${key === '帳號' ? '學號' : key}</th>`;
+                    });
+                    pTableHtml += '</tr></thead><tbody><tr>';
+                    
+                    orderedKeys.forEach(key => {
+                        let val = personalScore[key];
+                        if (val === "#DIV/0!") {
+                            val = "-";
+                        } else if (key === "平均" && !isNaN(parseFloat(val))) {
+                            val = parseFloat(val).toFixed(2);
+                        }
+                        pTableHtml += `<td>${val}</td>`;
+                    });
+                    pTableHtml += '</tr></tbody></table>';
+
+                    const rawScaleHeaders = data.scales.headers; 
+                    const validScaleHeaders = rawScaleHeaders.filter(h => h !== "名次" && h !== "備註");
+
+                    let scaleHtml = '<h3>班級總體級距分布與落點</h3>';
+                    scaleHtml += '<p style="font-size:13px; color:#666;"><span class="legend-box"></span> 黃色區塊為孩子在各評量單科與最終平均的班級級距坐落點。</p>';
+                    scaleHtml += '<table><thead><tr><th>級距名稱</th>';
+                    
+                    validScaleHeaders.forEach(sh => {
+                        scaleHtml += `<th>${sh}</th>`;
+                    });
+                    scaleHtml += '</tr></thead><tbody>';
+
+                    data.scales.rows.forEach(row => {
+                        const low = parseFloat(row.low);
+                        const high = parseFloat(row.high);
+
+                        scaleHtml += '<tr>';
+                        scaleHtml += `<td style="font-weight:bold; background-color:#f9f9f9;">${row.name}</td>`;
+
+                        validScaleHeaders.forEach(sh => {
+                            const originalIdx = rawScaleHeaders.indexOf(sh);
+                            const count = row.counts[originalIdx] !== undefined ? row.counts[originalIdx] : 0;
+                            
+                            let studentColumnScore = parseFloat(personalScore[sh]);
+                            let isPlacementMatch = false;
+
+                            if (!isNaN(studentColumnScore)) {
+                                if (row.name === "100 滿分" && studentColumnScore === 100) {
+                                    isPlacementMatch = true;
+                                } else if (row.name === "59分以下" && studentColumnScore < 60) {
+                                    isPlacementMatch = true;
+                                } else if (row.name !== "100 滿分" && row.name !== "59分以下" && studentColumnScore >= low && studentColumnScore < high) {
+                                    isPlacementMatch = true;
+                                }
+                            }
+
+                            const cellClass = isPlacementMatch ? 'class="student-placement-cell"' : '';
+                            scaleHtml += `<td ${cellClass}>${count}</td>`;
+                        });
+                        scaleHtml += '</tr>';
+                    });
+
+                    if (data.classAverages) {
+                        scaleHtml += '<tr class="class-average-row">';
+                        scaleHtml += '<td>班級單科平均</td>';
+                        
+                        validScaleHeaders.forEach(sh => {
+                            let avgVal = data.classAverages[sh];
+                            if (avgVal === undefined || avgVal === "" || avgVal === "#DIV/0!") {
+                                avgVal = "-";
+                            } else if (!isNaN(parseFloat(avgVal))) {
+                                avgVal = parseFloat(avgVal).toFixed(2);
+                            }
+                            scaleHtml += `<td>${avgVal}</td>`;
+                        });
+                        scaleHtml += '</tr>';
+                    }
+
+                    scaleHtml += '</tbody></table>';
+
+                    divScoreDisplay.innerHTML = pTableHtml + scaleHtml;
+                } else {
+                    divScoreDisplay.innerHTML = `<p style="color:red;">${data.message}</p>`;
+                }
+            })
+            .catch(() => divScoreDisplay.innerHTML = '<p style="color:red;">查詢失敗，請檢查網路狀態。</p>');
+        });
+
+        // ================= 帳號密碼與驗證控制表單 =================
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const username = this.querySelectorAll('input')[0].value.trim();
+            const password = this.querySelectorAll('input')[1].value.trim();
+            
+            fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'login', username, password }) })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    localStorage.setItem('username', username);
+                    if (data.isFirst) { lblPassTitle.textContent = "首次登入"; switchView(viewFirstLogin); }
+                    else { localStorage.setItem('nickname', '家長'); enterSystem(username, '家長'); }
+                } else { alert(data.message); }
+            })
+            .catch(() => alert('登入連線失敗，請確認網路或 API 網址'));
+        });
+
+        document.getElementById('changePasswordForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const newPassword = this.querySelectorAll('input')[0].value.trim();
+            const confirmPassword = this.querySelectorAll('input')[1].value.trim();
+            const email = this.querySelectorAll('input')[2].value.trim();
+            const username = localStorage.getItem('username');
+            
+            if (!username) return alert('登入逾時，請重新登入！');
+            if (newPassword !== confirmPassword) return alert('兩次密碼輸入不一致！');
+            
+            fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'changePassword', username, newPassword, email }) })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) { 
+                    alert('密碼變更成功，請用新密碼重新登入！'); 
+                    localStorage.clear(); 
+                    initSystem(); 
+                } else { 
+                    alert('修改失敗：' + data.message); 
+                }
+            })
+            .catch((err) => {
+                console.error(err);
+                alert('修改密碼發送失敗，請確認網路狀態與 API 網址是否正確。');
+            });
+        });
+
+        document.getElementById('sendEmailForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const username = this.querySelector('input[type="text"]').value.trim();
+            
+            fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'forgotPassword', username }) })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) { alert(data.message); localStorage.setItem('temp_reset_username', username); } else { alert(data.message); }
+            })
+            .catch(() => alert('發送郵件失敗，請確認網址與網路狀態'));
+        });
+
+        document.getElementById('verifyCodeForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const code = this.querySelector('input[type="text"]').value.trim();
+            const username = localStorage.getItem('temp_reset_username');
+            if (!username) return alert('請先輸入學號並發送驗證信！');
+            
+            fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'verifyCode', username, code }) })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) { localStorage.setItem('username', username); lblPassTitle.textContent = "忘記密碼"; switchView(viewFirstLogin); } else { alert(data.message); }
+            })
+            .catch(() => alert('驗證失敗，請確認驗證碼與網路連線'));
+        });
+
+        document.getElementById('toForgotPassword').addEventListener('click', function (e) { e.preventDefault(); switchView(viewFindPassword); });
+        document.getElementById('backToLogin').addEventListener('click', function (e) { e.preventDefault(); switchView(viewLogin); });
+        btnLogout.addEventListener('click', function () { if (confirm('確定要登出系統嗎？')) { localStorage.clear(); selectSubject.innerHTML = '<option value="">請選擇</option>'; divScoreDisplay.innerHTML = '<p>等待中...</p>'; initSystem(); } });
+
+        initSystem();
+    </script>
+</body>
+
+</html>
