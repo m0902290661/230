@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="png" href="logo.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>學生學習數據分析系統</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            background-color: #f8fafc; 
+            margin: 0; 
+            padding: 20px; 
+            color: #1e293b; 
+        }
+        .container { 
+            max-width: 1200px; /* 放寬寬度以利橫向排列 */
+            margin: 0 auto; 
+        }
+        h1 { 
+            text-align: center; 
+            color: #0f172a; 
+            margin-bottom: 30px; 
+        }
+        
+        /* 頂部列：身份與項目選擇器 */
+        .selector-card { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); 
+            margin-bottom: 20px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            flex-wrap: wrap; 
+            gap: 15px; 
+        }
+        select { 
+            padding: 10px 20px; 
+            font-size: 1rem; 
+            border-radius: 8px; 
+            border: 1px solid #cbd5e1; 
+            background-color: #fff; 
+            cursor: pointer; 
+            min-width: 220px; 
+        }
+        select:disabled {
+            background-color: #f1f5f9;
+            cursor: not-allowed;
+        }
+        
+        /* 數據指標看板 */
+        .dashboard { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); 
+            gap: 20px; 
+            margin-bottom: 25px; 
+        }
+        .stat-card { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 12px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02); 
+            border-top: 4px solid #3b82f6; 
+            text-align: center; 
+        }
+        .stat-card.rank { border-top-color: #10b981; }
+        .stat-card.avg { border-top-color: #f59e0b; }
+        .stat-value { 
+            font-size: 2rem; 
+            font-weight: 700; 
+            margin-top: 5px; 
+            color: #1e293b; 
+        }
+        
+        /* 橫向科目大網格 */
+        .subjects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* 單個科目的整包卡片 */
+        .subject-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            padding: 20px;
+            border-top: 4px solid #64748b;
+        }
+
+        /* 科目頂部個人分數表現 */
+        .subject-header {
+            text-align: center;
+            border-bottom: 1px dashed #e2e8f0;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+        .subject-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 5px;
+        }
+        .subject-score-display {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #1e293b;
+        }
+        .subject-compare {
+            font-size: 0.9rem;
+            margin-top: 4px;
+            font-weight: 600;
+        }
+        .up { color: #10b981; }
+        .down { color: #ef4444; }
+        .none { color: #64748b; }
+
+        /* 級距長條圖（緊貼在科目正下方） */
+        .dist-title-inline {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 10px;
+            text-align: center;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 4px;
+        }
+        .distribution-bar { 
+            display: flex; 
+            align-items: center; 
+            margin-bottom: 8px; 
+        }
+        .dist-label { 
+            width: 75px; 
+            font-size: 0.85rem; 
+            color: #64748b; 
+        }
+        .dist-progress-bg { 
+            flex-grow: 1; 
+            background: #e2e8f0; 
+            height: 14px; 
+            border-radius: 7px; 
+            margin: 0 10px; 
+            overflow: hidden; 
+        }
+        .dist-progress-fill { 
+            background: #cbd5e1; 
+            height: 100%; 
+            border-radius: 7px; 
+            width: 0%;
+            transition: width 0.6s ease-in-out; 
+        }
+        /* 當前使用者落點級距的黃色高亮標記 */
+        .dist-progress-fill.current-user-range { 
+            background: #f59e0b; 
+            box-shadow: 0 0 6px rgba(245, 158, 11, 0.6);
+        }
+        .dist-count { 
+            width: 40px; 
+            text-align: right; 
+            font-size: 0.85rem; 
+            font-weight: 600; 
+            color: #334155;
+        }
+
+        .loading, .error-msg { 
+            text-align: center; 
+            padding: 40px; 
+            font-size: 1.2rem; 
+            color: #64748b; 
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        .error-msg { color: #ef4444; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <img src="logo.png" style="height: 24px;" alt="">
+    <h1>成績查詢系統</h1>
+    <br>
+    <a style="text-decoration: none; background-color: black;color: white;border-radius: 5px;padding: 5px;" href="index.html">返回系統主頁</a>
+    <br><br>
+
+    <div class="selector-card">
+        <div>
+            <span id="studentIdent" style="font-size: 1.1rem; font-weight: 600; color: #334155;">正在讀取本機憑證...</span>
+        </div>
+        <div>
+            <label for="periodSelect" style="font-weight: 500; margin-right: 10px; color: #475569;">選擇項目：</label>
+            <select id="periodSelect" disabled>
+                <option>載入中</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="loadingStatus" class="loading">正在向雲端要求數據，請稍候...</div>
+
+    <div id="mainContent" style="display: none;">
+        
+        <div class="dashboard">
+            <div class="stat-card avg">
+                <div style="color: #b45309; font-weight: 600;">個人總平均</div>
+                <div class="stat-value" id="pAvg">0</div>
+            </div>
+            <div class="stat-card avg" style="border-top-color: #6366f1;">
+                <div style="color: #4f46e5; font-weight: 600;">班級總平均</div>
+                <div class="stat-value" id="cAvg">0</div>
+            </div>
+            <div class="stat-card rank">
+                <div style="color: #047857; font-weight: 600;">班級排名</div>
+                <div class="stat-value" id="pRank">0</div>
+            </div>
+            <div class="stat-card">
+                <div style="color: #1d4ed8; font-weight: 600;">班級總人數</div>
+                <div class="stat-value" id="cSize">0</div>
+            </div>
+        </div>
+
+        <div class="subjects-grid" id="subjectsGridContainer">
+            </div>
+
+    </div>
+</div>
+
+<script>
+    // ⚠️ 請將下方網址替換為您完成部署的 Google Apps Script 網頁應用程式網址
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwOSr9BM4Y9kYtrT9c80DKrc0VOkAR0K2zlLb60nyifxAXpJhYdFW12OJaNZDCunbmg/exec";
+
+    // 快取全域數據
+    let globalData = {}; 
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const rawUsername = localStorage.getItem("username");
+        
+        if (!rawUsername || rawUsername.trim() === "") {
+            document.getElementById("loadingStatus").className = "error-msg";
+            document.getElementById("loadingStatus").innerHTML = "❌ 身份辨識失敗：本機 localStorage 中不存在 'username' 欄位，或內容為空。";
+            document.getElementById("studentIdent").innerText = "未登入";
+            return;
+        }
+
+        const username = rawUsername.trim();
+        document.getElementById("studentIdent").innerText = `🔍 正在辨識帳戶：${username}...`;
+
+        fetch(`${GAS_API_URL}?username=${encodeURIComponent(username)}`)
+            .then(res => {
+                if (!res.ok) throw new Error("網路連線回應異常");
+                return res.json();
+            })
+            .then(res => {
+                if(res.status === "success") {
+                    globalData = res.data;
+                    const periods = Object.keys(globalData);
+
+                    if(periods.length === 0) {
+                        document.getElementById("loadingStatus").className = "error-msg";
+                        document.getElementById("loadingStatus").innerHTML = `📭 辨識失敗：所有資料中皆查無與「${username}」相符的帳戶。<br><small style="color:#747d8c; display:block; margin-top:5px;">請確認該帳戶是否存在。</small>`;
+                        document.getElementById("studentIdent").innerText = "找不到相符資料";
+                        return;
+                    }
+
+                    const studentRealName = globalData[periods[0]].studentName;
+                    document.getElementById("studentIdent").innerText = `👤 學生姓名：${studentRealName} (${username})`;
+                    
+                    const selectEl = document.getElementById("periodSelect");
+                    selectEl.innerHTML = "";
+                    periods.forEach(p => {
+                        let opt = document.createElement("option");
+                        opt.value = p;
+                        opt.innerText = p;
+                        selectEl.appendChild(opt);
+                    });
+                    selectEl.disabled = false;
+
+                    document.getElementById("loadingStatus").style.display = "none";
+                    document.getElementById("mainContent").style.display = "block";
+
+                    selectEl.addEventListener("change", (e) => {
+                        renderAnalysis(e.target.value);
+                    });
+
+                    // 預設呈現第一個項目
+                    renderAnalysis(periods[0]);
+
+                } else {
+                    document.getElementById("loadingStatus").className = "error-msg";
+                    document.getElementById("loadingStatus").innerText = `❌ 後端回報錯誤：${res.message}`;
+                }
+            })
+            .catch(err => {
+                document.getElementById("loadingStatus").className = "error-msg";
+                document.getElementById("loadingStatus").innerText = "❌ 無法與雲端伺服器建立連線，請通報網站管理員。";
+            });
+    });
+
+    function renderAnalysis(periodKey) {
+        const report = globalData[periodKey];
+        
+        // 更新頂部看板
+        document.getElementById("pAvg").innerText = report.personalAvg;
+        document.getElementById("cAvg").innerText = report.classTotalAverage || "0"; // 💡 新增：將後端算好的班級總平均塞進 HTML
+        document.getElementById("pRank").innerText = `第 ${report.personalRank} 名`;
+        document.getElementById("cSize").innerText = `${report.classSize} 人`;
+
+        // 清空並重新建立橫向科目網格
+        const gridContainer = document.getElementById("subjectsGridContainer");
+        gridContainer.innerHTML = "";
+
+        // 遍歷所有科目生成獨立區塊
+        for(let subj in report.personalScores) {
+            let rawMyScore = report.personalScores[subj];
+            let classAvg = report.classAverages[subj] || 0;
+            // 💡 取得後端傳來的該科標準差，若無則預設為 0
+            let classSD = (report.classSDs && report.classSDs[subj]) ? parseFloat(report.classSDs[subj]) : 0;
+            let allScores = report.allSubjectScores[subj] || [];
+            
+            let diffText = "-";
+            let diffClass = "none";
+            let myScoreDisplay = "尚未輸入";
+            let numericMyScore = null;
+
+            // 確保個人分數有效並轉為數字
+            if(rawMyScore !== null && rawMyScore !== undefined && rawMyScore !== "尚未輸入" && !isNaN(rawMyScore)) {
+                numericMyScore = parseFloat(rawMyScore);
+                myScoreDisplay = numericMyScore;
+
+                if (classSD > 0) {
+                    // 💡 計算 Z 分數 (距離平均值幾個標準差)
+                    let zScore = ((numericMyScore - classAvg) / classSD).toFixed(2);
+                    
+                    if(zScore > 0) {
+                        diffText = `高於平均 +${zScore} 倍標準差`;
+                        diffClass = "up";
+                    } else if(zScore < 0) {
+                        diffText = `低於平均 ${zScore} 倍標準差`;
+                        diffClass = "down";
+                    } else {
+                        diffText = "持平班平均 (+0.00 SD)";
+                    }
+                } else {
+                    // 如果標準差為 0 (例如全班同分，無法計算倍數)
+                    let diff = numericMyScore - classAvg;
+                    if (diff === 0) {
+                        diffText = "持平班平均";
+                    } else {
+                        diffText = "無法計算標準差倍數 (全班分數可能相同)";
+                    }
+                }
+            }
+
+            // 1. 建立科目卡片容器
+            let card = document.createElement("div");
+            card.className = "subject-card";
+
+            // 💡 格式化標準差顯示文字
+            let sdDisplayHtml = classSD > 0 ? `${classSD.toFixed(2)}` : "無數據/均為同分";
+
+            // 2. 組裝上半部：成績與對比 (將平均值、標準差分行展示，並美化視覺)
+            let headerHtml = `
+                <div class="subject-header">
+                    <div class="subject-name">${subj}</div>
+                    <div class="subject-score-display">${myScoreDisplay}</div>
+                    <div style="font-size:0.85rem; color:#64748b; margin-top: 5px;">班級平均: <strong>${classAvg}</strong></div>
+                    <div style="font-size:0.85rem; color:#64748b; margin-bottom: 8px;">班級標準差: <strong>${sdDisplayHtml}</strong></div>
+                    <div class="subject-compare ${diffClass}" style="border-top: 1px dotted #cbd5e1; padding-top: 6px; display: inline-block; width: 100%;">${diffText}</div>
+                </div>
+            `;
+            
+            // 3. 定義級距
+            const bins = [
+                { label: "100 分", check: (s) => s >= 100, count: 0 },
+                { label: "90 ~ 99 分", check: (s) => s >= 90 && s < 100, count: 0 },
+                { label: "80 ~ 89 分", check: (s) => s >= 80 && s < 90, count: 0 },
+                { label: "70 ~ 79 分", check: (s) => s >= 70 && s < 80, count: 0 },
+                { label: "60 ~ 69 分", check: (s) => s >= 60 && s < 70, count: 0 },
+                { label: "60 分以下", check: (s) => s < 60, count: 0 }
+            ];
+
+            // 計算該科全班在此級距的人數
+            allScores.forEach(score => {
+                if (score !== null && score !== undefined && !isNaN(score) && score !== "尚未輸入") {
+                    let numScore = parseFloat(score);
+                    for(let b of bins) {
+                        if(b.check(numScore)) {
+                            b.count++;
+                            break;
+                        }
+                    }
+                }
+            });
+
+            // 尋找當前使用者在此科目的落點級距
+            let myBinIndex = -1;
+            if (numericMyScore !== null) {
+                for(let i = 0; i < bins.length; i++) {
+                    if(bins[i].check(numericMyScore)) {
+                        myBinIndex = i;
+                        break;
+                    }
+                }
+            }
+
+            // 生成長條圖 HTML
+            let distHtml = `<div class="dist-title-inline">全班分數級距分佈 (黃色高光為您的落點)</div>`;
+            bins.forEach((b, idx) => {
+                let percentage = report.classSize > 0 ? (b.count / report.classSize) * 100 : 0;
+                let isMyBin = (idx === myBinIndex);
+
+                distHtml += `
+                    <div class="distribution-bar">
+                        <div class="dist-label">${b.label}</div>
+                        <div class="dist-progress-bg">
+                            <div class="dist-progress-fill ${isMyBin ? 'current-user-range' : ''}" style="width: ${percentage}%"></div>
+                        </div>
+                        <div class="dist-count">${b.count} 人</div>
+                    </div>
+                `;
+            });
+
+            // 結合並推入網格中
+            card.innerHTML = headerHtml + distHtml;
+            gridContainer.appendChild(card);
+        }
+    }
+</script>
+
+</body>
+</html>
