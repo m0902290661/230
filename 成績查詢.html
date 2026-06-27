@@ -84,6 +84,11 @@
             background-color: #45a049;
         }
 
+        input[type="submit"]:disabled, button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+
         .login a {
             float: right;
             margin-top: 10px;
@@ -239,6 +244,7 @@
         <p>本系統由許元洧維護 若有問題請<a href="問題通報.html">通報</a></p>
     </footer>
 
+    <script src="auth.js"></script>
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbzRK31k20n3UNzzkU2s1a5ZsN_s1dhOiJZ5lfh62Y2-iI5yfSbw8MOKGaEtcrg7A9HiOA/exec"; // ⚠️ 請務必替換成你的最新 GAS 部署網址
 
@@ -252,6 +258,20 @@
         const divScoreDisplay = document.getElementById('scoreDisplay');
         const btnLogout = document.getElementById('logoutBtn');
         const lblPassTitle = document.getElementById('passTitle');
+        let pendingAccountUsername = "";
+
+        function setSubmitLoading(submitControl, isLoading, loadingText) {
+            if (!submitControl) return;
+            if (!submitControl.dataset.originalValue) {
+                submitControl.dataset.originalValue = submitControl.value || submitControl.textContent;
+            }
+            submitControl.disabled = isLoading;
+            if (submitControl.tagName === "INPUT") {
+                submitControl.value = isLoading ? loadingText : submitControl.dataset.originalValue;
+            } else {
+                submitControl.textContent = isLoading ? loadingText : submitControl.dataset.originalValue;
+            }
+        }
 
         function switchView(targetView) {
             viewLogin.style.display = 'none';
@@ -261,11 +281,10 @@
             if (targetView) targetView.style.display = 'block';
         }
 
-        function initSystem() {
-            const username = localStorage.getItem('username');
-            const nickname = localStorage.getItem('nickname');
-            if (username && nickname) {
-                enterSystem(username, nickname);
+        async function initSystem() {
+            const authSession = await AuthGuard.validateSession();
+            if (authSession.valid) {
+                enterSystem(authSession.username, authSession.nickname);
             } else {
                 switchView(viewLogin);
             }
@@ -297,9 +316,11 @@
                 .catch(() => selectSubject.innerHTML = '<option value="">網路連線錯誤</option>');
         }
 
-        selectSubject.addEventListener('change', function () {
+        selectSubject.addEventListener('change', async function () {
             const subject = this.value;
-            const username = localStorage.getItem('username');
+            const authSession = await AuthGuard.requireSession('login.html');
+            if (!authSession) return;
+            const username = authSession.username;
             if (!subject) {
                 divScoreDisplay.innerHTML = '<p>等待中...</p>';
                 return;
@@ -314,7 +335,6 @@
             .then(data => {
                 if (data.success) {
                     if (data.nickname) {
-                        localStorage.setItem('nickname', data.nickname);
                         txtIdentity.textContent = `${data.nickname} (${username})`;
                     }
                     
@@ -417,77 +437,118 @@
         // ================= 帳號密碼與驗證控制表單 =================
         document.getElementById('loginForm').addEventListener('submit', function (e) {
             e.preventDefault();
+            const submitBtn = this.querySelector('input[type="submit"]');
+            if (submitBtn.disabled) return;
             const username = this.querySelectorAll('input')[0].value.trim();
             const password = this.querySelectorAll('input')[1].value.trim();
+            setSubmitLoading(submitBtn, true, "登入中...");
             
             fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'login', username, password }) })
             .then(res => res.json())
-            .then(data => {
+            .then(async data => {
                 if (data.success) {
-                    localStorage.setItem('username', username);
-                    if (data.isFirst) { lblPassTitle.textContent = "首次登入"; switchView(viewFirstLogin); }
-                    else { localStorage.setItem('nickname', '家長'); enterSystem(username, '家長'); }
-                } else { alert(data.message); }
+                    if (data.isFirst) {
+                        pendingAccountUsername = username;
+                        lblPassTitle.textContent = "首次登入";
+                        switchView(viewFirstLogin);
+                    } else {
+                        await AuthGuard.createSession(username, '家長', password);
+                        enterSystem(username, '家長');
+                    }
+                } else {
+                    alert(data.message);
+                    setSubmitLoading(submitBtn, false);
+                }
             })
-            .catch(() => alert('登入連線失敗，請確認網路或 API 網址'));
+            .catch(() => {
+                alert('登入連線失敗，請確認網路或 API 網址');
+                setSubmitLoading(submitBtn, false);
+            });
         });
 
         document.getElementById('changePasswordForm').addEventListener('submit', function (e) {
             e.preventDefault();
+            const submitBtn = this.querySelector('input[type="submit"]');
+            if (submitBtn.disabled) return;
             const newPassword = this.querySelectorAll('input')[0].value.trim();
             const confirmPassword = this.querySelectorAll('input')[1].value.trim();
             const email = this.querySelectorAll('input')[2].value.trim();
-            const username = localStorage.getItem('username');
+            const username = pendingAccountUsername;
             
             if (!username) return alert('登入逾時，請重新登入！');
             if (newPassword !== confirmPassword) return alert('兩次密碼輸入不一致！');
+            setSubmitLoading(submitBtn, true, "更改中...");
             
             fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'changePassword', username, newPassword, email }) })
             .then(res => res.json())
             .then(data => {
                 if (data.success) { 
                     alert('密碼變更成功，請用新密碼重新登入！'); 
-                    localStorage.clear(); 
+                    pendingAccountUsername = "";
+                    AuthGuard.clearSession();
+                    setSubmitLoading(submitBtn, false);
                     initSystem(); 
                 } else { 
                     alert('修改失敗：' + data.message); 
+                    setSubmitLoading(submitBtn, false);
                 }
             })
             .catch((err) => {
                 console.error(err);
                 alert('修改密碼發送失敗，請確認網路狀態與 API 網址是否正確。');
+                setSubmitLoading(submitBtn, false);
             });
         });
 
         document.getElementById('sendEmailForm').addEventListener('submit', function (e) {
             e.preventDefault();
+            const submitBtn = this.querySelector('input[type="submit"]');
+            if (submitBtn.disabled) return;
             const username = this.querySelector('input[type="text"]').value.trim();
+            setSubmitLoading(submitBtn, true, "發送中...");
             
             fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'forgotPassword', username }) })
             .then(res => res.json())
             .then(data => {
-                if (data.success) { alert(data.message); localStorage.setItem('temp_reset_username', username); } else { alert(data.message); }
+                if (data.success) { alert(data.message); pendingAccountUsername = username; } else { alert(data.message); }
+                setSubmitLoading(submitBtn, false);
             })
-            .catch(() => alert('發送郵件失敗，請確認網址與網路狀態'));
+            .catch(() => {
+                alert('發送郵件失敗，請確認網址與網路狀態');
+                setSubmitLoading(submitBtn, false);
+            });
         });
 
         document.getElementById('verifyCodeForm').addEventListener('submit', function (e) {
             e.preventDefault();
+            const submitBtn = this.querySelector('input[type="submit"]');
+            if (submitBtn.disabled) return;
             const code = this.querySelector('input[type="text"]').value.trim();
-            const username = localStorage.getItem('temp_reset_username');
+            const username = pendingAccountUsername;
             if (!username) return alert('請先輸入學號並發送驗證信！');
+            setSubmitLoading(submitBtn, true, "驗證中...");
             
             fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'verifyCode', username, code }) })
             .then(res => res.json())
             .then(data => {
-                if (data.success) { localStorage.setItem('username', username); lblPassTitle.textContent = "忘記密碼"; switchView(viewFirstLogin); } else { alert(data.message); }
+                if (data.success) {
+                    lblPassTitle.textContent = "忘記密碼";
+                    setSubmitLoading(submitBtn, false);
+                    switchView(viewFirstLogin);
+                } else {
+                    alert(data.message);
+                    setSubmitLoading(submitBtn, false);
+                }
             })
-            .catch(() => alert('驗證失敗，請確認驗證碼與網路連線'));
+            .catch(() => {
+                alert('驗證失敗，請確認驗證碼與網路連線');
+                setSubmitLoading(submitBtn, false);
+            });
         });
 
         document.getElementById('toForgotPassword').addEventListener('click', function (e) { e.preventDefault(); switchView(viewFindPassword); });
         document.getElementById('backToLogin').addEventListener('click', function (e) { e.preventDefault(); switchView(viewLogin); });
-        btnLogout.addEventListener('click', function () { if (confirm('確定要登出系統嗎？')) { localStorage.clear(); selectSubject.innerHTML = '<option value="">請選擇</option>'; divScoreDisplay.innerHTML = '<p>等待中...</p>'; initSystem(); } });
+        btnLogout.addEventListener('click', function () { if (confirm('確定要登出系統嗎？')) { AuthGuard.clearSession(); pendingAccountUsername = ""; selectSubject.innerHTML = '<option value="">請選擇</option>'; divScoreDisplay.innerHTML = '<p>等待中...</p>'; initSystem(); } });
 
         initSystem();
     </script>

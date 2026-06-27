@@ -72,21 +72,17 @@
     <div class="status-msg" id="statusMsg"></div>
 </div>
 
+<script src="auth.js"></script>
 <script>
     let gasUrl = "";
     let username = "";
     let nickname = "";
 
-    window.onload = function() {
-        const isLoggedIn = localStorage.getItem("isLoggedIn");
-        username = localStorage.getItem("username");
-        nickname = localStorage.getItem("nickname");
-
-        if (isLoggedIn !== "true" || !username || !nickname) {
-            alert("驗證逾時，請重新登入！");
-            window.location.href = "login.html";
-            return;
-        }
+    window.onload = async function() {
+        const authSession = await AuthGuard.requireSession("login.html");
+        if (!authSession) return;
+        username = authSession.username;
+        nickname = authSession.nickname;
 
         // 畫面上渲染使用者資訊
         document.getElementById('userNameTxt').textContent = `${nickname} (${username})`;
@@ -102,6 +98,8 @@
         const type = document.getElementById('reportType').value;
         const btn = document.getElementById('submitBtn');
         const msg = document.getElementById('statusMsg');
+
+        if (btn.disabled) return;
 
         if (!content) {
             alert("請填寫回報內容後再送出！");

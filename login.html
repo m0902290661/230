@@ -64,6 +64,11 @@
             background-color: #0056b3;
         }
 
+        button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+
         .btn-success {
             background-color: #28a745;
         }
@@ -139,6 +144,7 @@
         </div>
     </div>
 
+    <script src="auth.js"></script>
     <script>
         let gasUrl = ""; // 用來儲存從 json 抓到的 API 網址
 
@@ -149,6 +155,13 @@
         };
 
         const messageDiv = document.getElementById('message');
+
+        function setButtonLoading(button, isLoading, loadingText) {
+            if (!button) return;
+            if (!button.dataset.originalText) button.dataset.originalText = button.textContent;
+            button.disabled = isLoading;
+            button.textContent = isLoading ? loadingText : button.dataset.originalText;
+        }
 
         // 當網頁載入時，自動抓取 api.json
         window.addEventListener('DOMContentLoaded', () => {
@@ -171,6 +184,8 @@
         // --- 處理一般登入 ---
         document.getElementById('loginForm').addEventListener('submit', function (e) {
             e.preventDefault();
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if (submitBtn.disabled) return;
 
             if (!gasUrl) {
                 alert("API 尚未就緒，請稍後再試。");
@@ -182,6 +197,7 @@
 
             messageDiv.textContent = "登入中...";
             messageDiv.className = "";
+            setButtonLoading(submitBtn, true, "登入中...");
 
             fetch(gasUrl, { // 這裡改用抓取到的變數
                 method: "POST",
@@ -194,7 +210,7 @@
                 })
             })
                 .then(response => response.json())
-                .then(data => {
+                .then(async data => {
                     if (data.status === "success") {
                         userSession.username = username;
                         userSession.nickname = data.nickname;
@@ -208,27 +224,29 @@
                             messageDiv.textContent = "登入成功，正在導向主頁...";
                             messageDiv.className = "success";
 
-                            localStorage.setItem("isLoggedIn", "true");
-                            localStorage.setItem("username", username);
-                            localStorage.setItem("nickname", data.nickname);
+                            await AuthGuard.createSession(username, data.nickname, password);
 
                             setTimeout(() => { window.location.href = "index.html"; }, 1000);
                         }
                     } else {
                         messageDiv.textContent = data.message;
                         messageDiv.className = "fail";
+                        setButtonLoading(submitBtn, false);
                     }
                 })
                 .catch(error => {
                     console.error("Error:", error);
                     messageDiv.textContent = "系統連線錯誤。";
                     messageDiv.className = "fail";
+                    setButtonLoading(submitBtn, false);
                 });
         });
 
         // --- 處理首次登入的資料更新 ---
         document.getElementById('profileForm').addEventListener('submit', function (e) {
             e.preventDefault();
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if (submitBtn.disabled) return;
 
             if (!gasUrl) return;
 
@@ -244,6 +262,7 @@
 
             messageDiv.textContent = "正在更新資料...";
             messageDiv.className = "";
+            setButtonLoading(submitBtn, true, "儲存中...");
 
             fetch(gasUrl, { // 這裡改用抓取到的變數
                 method: "POST",
@@ -257,25 +276,25 @@
                 })
             })
                 .then(response => response.json())
-                .then(data => {
+                .then(async data => {
                     if (data.status === "success") {
                         messageDiv.textContent = "設定成功！正在登入主頁...";
                         messageDiv.className = "success";
 
-                        localStorage.setItem("isLoggedIn", "true");
-                        localStorage.setItem("username", userSession.username);
-                        localStorage.setItem("nickname", userSession.nickname);
+                        await AuthGuard.createSession(userSession.username, userSession.nickname, newPassword);
 
                         setTimeout(() => { window.location.href = "index.html"; }, 1500);
                     } else {
                         messageDiv.textContent = data.message;
                         messageDiv.className = "fail";
+                        setButtonLoading(submitBtn, false);
                     }
                 })
                 .catch(error => {
                     console.error("Error:", error);
                     messageDiv.textContent = "更新失敗，請檢查網路連線。";
                     messageDiv.className = "fail";
+                    setButtonLoading(submitBtn, false);
                 });
         });
     </script>
