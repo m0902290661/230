@@ -452,7 +452,7 @@
                         lblPassTitle.textContent = "首次登入";
                         switchView(viewFirstLogin);
                     } else {
-                        await AuthGuard.createSession(username, '家長', password);
+                        await AuthGuard.createSession(username, '家長', password, "parent");
                         enterSystem(username, '家長');
                     }
                 } else {

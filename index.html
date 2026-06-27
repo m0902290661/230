@@ -736,6 +736,11 @@
         window.onload = async function () {
             const authSession = await AuthGuard.requireSession("login.html");
             if (!authSession) return;
+            if (authSession.role === "parent") {
+                alert("家長帳號僅能使用成績查詢系統，無法進入班務主頁。");
+                window.location.href = "成績查詢.html";
+                return;
+            }
             const username = authSession.username;
             const nickname = authSession.nickname;
 

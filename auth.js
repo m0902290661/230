@@ -1,6 +1,6 @@
 (function () {
     const SESSION_KEY = "authSession";
-    const SESSION_VERSION = 1;
+    const SESSION_VERSION = 2;
     const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
 
     function textToBytes(text) {
@@ -29,6 +29,7 @@
     function sessionPayload(session) {
         return [
             session.version,
+            session.role,
             session.username,
             session.nickname,
             session.issuedAt,
@@ -49,10 +50,11 @@
         localStorage.removeItem("temp_reset_username");
     }
 
-    async function createSession(username, nickname, password) {
+    async function createSession(username, nickname, password, role) {
         const issuedAt = Date.now();
         const session = {
             version: SESSION_VERSION,
+            role: role || "student",
             username: String(username || "").trim(),
             nickname: String(nickname || "").trim(),
             issuedAt,
@@ -60,7 +62,7 @@
             nonce: randomHex(16)
         };
 
-        if (!session.username || !session.nickname || !password) {
+        if (!session.username || !session.nickname || !password || !["student", "parent"].includes(session.role)) {
             throw new Error("缺少登入資訊，無法建立密鑰。");
         }
 
@@ -97,6 +99,7 @@
 
         const requiredFields = [
             "version",
+            "role",
             "username",
             "nickname",
             "issuedAt",
@@ -129,6 +132,7 @@
 
         return {
             valid: true,
+            role: session.role,
             username: session.username,
             nickname: session.nickname,
             expiresAt: session.expiresAt

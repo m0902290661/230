@@ -224,7 +224,7 @@
                             messageDiv.textContent = "登入成功，正在導向主頁...";
                             messageDiv.className = "success";
 
-                            await AuthGuard.createSession(username, data.nickname, password);
+                            await AuthGuard.createSession(username, data.nickname, password, "student");
 
                             setTimeout(() => { window.location.href = "index.html"; }, 1000);
                         }
@@ -281,7 +281,7 @@
                         messageDiv.textContent = "設定成功！正在登入主頁...";
                         messageDiv.className = "success";
 
-                        await AuthGuard.createSession(userSession.username, userSession.nickname, newPassword);
+                        await AuthGuard.createSession(userSession.username, userSession.nickname, newPassword, "student");
 
                         setTimeout(() => { window.location.href = "index.html"; }, 1500);
                     } else {
