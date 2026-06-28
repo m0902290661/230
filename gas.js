@@ -6,6 +6,112 @@ function doPost(e) {
     var action = params.action;
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     
+    // --- 💡 新增動作九：忘記密碼 - 寄送 Email 驗證碼 ---
+    if (action === "sendResetCode") {
+      var sheet = ss.getSheetByName("users");
+      if (!sheet) return output.setMimeType(ContentService.MimeType.JSON).setContent(JSON.stringify({ status: "fail", message: "找不到用戶資料表。" }));
+      
+      var username = params.username.toString().trim();
+      var data = sheet.getDataRange().getValues();
+      var userEmail = "";
+      var rowIndex = -1;
+      
+      // 1. 尋找帳號與對應的 Email (假設：A欄帳號、E欄Email，如 updateProfile 所對應)
+      for (var i = 1; i < data.length; i++) {
+        if (data[i][0].toString().trim() === username) {
+          userEmail = data[i][4] ? data[i][4].toString().trim() : ""; // 第 5 欄 (E欄)
+          rowIndex = i + 1;
+          break;
+        }
+      }
+      
+      if (rowIndex === -1) {
+        return output.setMimeType(ContentService.MimeType.JSON).setContent(JSON.stringify({ status: "fail", message: "找不到該帳號，請確認輸入是否正確。" }));
+      }
+      
+      if (!userEmail || userEmail.indexOf("@") === -1) {
+        return output.setMimeType(ContentService.MimeType.JSON).setContent(JSON.stringify({ status: "fail", message: "該帳號尚未綁定有效的電子郵件，請聯繫管理員。" }));
+      }
+      
+      // 2. 產生 6 位數隨機驗證碼
+      var code = Math.floor(100000 + Math.random() * 900000).toString();
+      
+      // 3. 將驗證碼與有效時間（例如 10 分鐘後）暫存到 Google 屬性服務 (Properties Service)
+      var scriptProperties = PropertiesService.getScriptProperties();
+      var expireTime = new Date().getTime() + (10 * 60 * 1000); // 10 分鐘
+      
+      scriptProperties.setProperty("reset_" + username, JSON.stringify({ code: code, expire: expireTime }));
+      
+      // 4. 透過 GmailApp 寄送驗證碼信件
+      try {
+        var emailBody = "您好：\n\n您正在進行高二智系統的密碼重設申請。\n您的驗證碼為： " + code + " \n該驗證碼將於 10 分鐘後過期。\n\n如果非您本人操作，請忽略此郵件。";
+        GmailApp.sendEmail(userEmail, "【高二智系統】密碼重設驗證碼", emailBody);
+        
+        // 為了安全性，隱碼處理前端顯示的 Email (例如: ex***le@mail.com)
+        var emailParts = userEmail.split("@");
+        var maskedEmail = emailParts[0].substring(0, 2) + "***" + "@" + emailParts[1];
+        
+        return output.setMimeType(ContentService.MimeType.JSON).setContent(JSON.stringify({ 
+          status: "success", 
+          message: "驗證碼已成功寄出！", 
+          maskedEmail: maskedEmail 
+        }));
+      } catch (mailErr) {
+        return output.setMimeType(ContentService.MimeType.JSON).setContent(JSON.stringify({ status: "fail", message: "郵件寄送失敗，請稍後再試或聯繫管理員。" }));
+      }
+    }
+
+    // --- 💡 新增動作十：忘記密碼 - 驗證並重設密碼 ---
+    if (action === "resetPassword") {
+      var sheet = ss.getSheetByName("users");
+      var username = params.username.toString().trim();
+      var inputCode = params.code.toString().trim();
+      var newPassword = params.newPassword.toString().trim();
+      
+      // 1. 取得剛剛儲存的驗證碼資訊
+      var scriptProperties = PropertiesService.getScriptProperties();
+      var savedDataStr = scriptProperties.getProperty("reset_" + username);
+      
+      if (!savedDataStr) {
+        return output.setMimeType(ContentService.MimeType.JSON).setContent(JSON.stringify({ status: "fail", message: "驗證碼已失效或尚未申請，請重新獲取。" }));
+      }
+      
+      var savedData = JSON.parse(savedDataStr);
+      var currentTime = new Date().getTime();
+      
+      // 2. 檢查是否過期與驗證碼是否正確
+      if (currentTime > savedData.expire) {
+        scriptProperties.deleteProperty("reset_" + username); // 刪除過期資料
+        return output.setMimeType(ContentService.MimeType.JSON).setContent(JSON.stringify({ status: "fail", message: "驗證碼已過期，請重新獲取。" }));
+      }
+      
+      if (savedData.code !== inputCode) {
+        return output.setMimeType(ContentService.MimeType.JSON).setContent(JSON.stringify({ status: "fail", message: "驗證碼錯誤，請重新輸入。" }));
+      }
+      
+      // 3. 驗證成功，尋找該用戶並變更密碼 (B欄，第 2 欄)
+      var data = sheet.getDataRange().getValues();
+      var rowIndex = -1;
+      for (var i = 1; i < data.length; i++) {
+        if (data[i][0].toString().trim() === username) {
+          rowIndex = i + 1;
+          break;
+        }
+      }
+      
+      if (rowIndex === -1) {
+        return output.setMimeType(ContentService.MimeType.JSON).setContent(JSON.stringify({ status: "fail", message: "找不到該帳號。" }));
+      }
+      
+      // 寫入新密碼，並清除驗證碼
+      sheet.getRange(rowIndex, 2).setValue(newPassword);
+      scriptProperties.deleteProperty("reset_" + username);
+      
+      return output.setMimeType(ContentService.MimeType.JSON).setContent(JSON.stringify({ 
+        status: "success", 
+        message: "密碼重設成功！請使用新密碼登入。" 
+      }));
+    }
     // --- 動作一：登入驗證 ---
     if (action === "login") {
       var sheet = ss.getSheetByName("users");
