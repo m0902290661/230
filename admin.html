@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高二智班務系統 - 管理員後台</title>
+    <link rel="icon" href="logo.png" type="png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; display: none; } /* 💡 預設隱藏，防止畫面閃爍閃現 */
+        .container { max-width: 1100px; margin: 0 auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .logout-btn { background: #e74c3c; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 14px; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .tab-btn { background: #ecf0f1; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 15px; transition: 0.3s; }
+        .tab-btn.active { background: #3498db; color: white; font-weight: bold; }
+        .content-section { display: flex; gap: 20px; flex-direction: column; }
+        @media(min-width: 768px) { .content-section { flex-direction: row; } }
+        .form-area { flex: 1; background: #f8f9fa; padding: 20px; border-radius: 6px; border: 1px solid #dee2e6; height: fit-content; }
+        .list-area { flex: 2; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #34495e; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+        .form-group textarea { height: 100px; resize: vertical; }
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+        .btn { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; display: inline-flex; align-items: center; gap: 5px; }
+        .btn-primary { background: #2ecc71; color: white; }
+        .btn-danger { background: #e74c3c; color: white; }
+        .btn-secondary { background: #95a5a6; color: white; }
+        .btn-batch-delete { background: #c0392b; color: white; margin-bottom: 10px; }
+        .table-container { overflow-x: auto; background: white; border: 1px solid #dee2e6; border-radius: 4px; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+        th, td { padding: 12px; border-bottom: 1px solid #dee2e6; }
+        th { background: #f1f2f6; color: #2c3e50; }
+        tr:hover { background: #f8f9fa; }
+        .actions-cell { display: flex; gap: 5px; }
+        .action-btn { border: none; padding: 5px 8px; border-radius: 3px; cursor: pointer; font-size: 12px; color: white; }
+        .edit-btn { background: #3498db; }
+        .del-btn { background: #e74c3c; }
+        .csv-area { background: #ebf5fb; border: 1px dashed #3498db; padding: 15px; border-radius: 6px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 15px; }
+        .csv-title { font-weight: bold; color: #2980b9; display: flex; align-items: center; gap: 8px; }
+        .csv-input-wrapper { display: flex; align-items: center; gap: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>
+        <span><i class="fa-solid fa-toolbox"></i> 高二智班務系統 - 管理員後台</span>
+        <button class="logout-btn" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> 登出後台</button>
+    </h1>
+
+    <div class="tabs" id="tableTabs">
+        <button class="tab-btn active" onclick="switchTable('announcements')"><i class="fa-solid fa-bullhorn"></i> 班級公告</button>
+        <button class="tab-btn" onclick="switchTable('private_messages')"><i class="fa-solid fa-envelope"></i> 個人私訊</button>
+        <button class="tab-btn" onclick="switchTable('course_resources')"><i class="fa-solid fa-layer-group"></i> 課程網站資源</button>
+        <button class="tab-btn" onclick="switchTable('reports')"><i class="fa-solid fa-triangle-exclamation"></i> 問題回報處理</button>
+        <button class="tab-btn" onclick="switchTable('users')"><i class="fa-solid fa-users-gear"></i> 使用者密碼管理</button>
+        <button class="tab-btn" onclick="window.open('index.html', '_blank');"><i class="fa-solid fa-arrow-pointer"></i> 切換至前台</button>
+    </div>
+
+    <div class="csv-area" id="csvBatchArea" style="display: none;">
+        <div class="csv-title">
+            <i class="fa-solid fa-file-csv fa-lg"></i>
+            <div>
+                批量發布個人私訊 (CSV)<br>
+                <small style="color: #555; font-weight: normal;">欄位格式必須為：日期, 發布人, 學號, 標題, 內容</small>
+            </div>
+        </div>
+        <div class="csv-input-wrapper">
+            <input type="file" id="csvFileInput" accept=".csv">
+            <button class="btn btn-primary" onclick="handleCsvUpload()"><i class="fa-solid fa-upload"></i> 解析並發布</button>
+        </div>
+    </div>
+
+    <div class="content-section">
+        <div class="form-area">
+            <h3 id="formTitle">新增項目</h3>
+            <form id="itemForm" onsubmit="saveItem(event)">
+                <input type="hidden" id="itemId">
+                <div id="dynamicFields"></div>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> 儲存資料</button>
+                    <button type="button" class="btn btn-secondary" onclick="resetForm()"><i class="fa-solid fa-rotate-left"></i> 取消</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="list-area">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3>目前資料列表</h3>
+                <button class="btn btn-batch-delete" onclick="batchDeleteItems()"><i class="fa-solid fa-trash-can"></i> 批量刪除選取項目</button>
+            </div>
+            <div class="table-container">
+                <table id="dataTable">
+                    <thead id="tableHead"></thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 👑 調整：將原本硬編碼的網址改為由 api.json 動態讀取
+    let gasUrl = ""; 
+
+    let currentTable = 'announcements';
+    let currentData = [];
+
+    // 👑 新增：非同步自 json 載入 API 網址設定
+    async function loadConfig() {
+        try {
+            const response = await fetch('api.json');
+            const config = await response.json();
+            gasUrl = config.GAS_WEB_APP_URL;
+        } catch (error) {
+            console.error("無法載入 api.json 配置文件:", error);
+            alert("系統初始化失敗：管理員後台未偵測到正確的 api.json 配置檔案。");
+        }
+    }
+
+    // 頁面加載安全驗證（已補上防呆、trim 與 api.json 同步載入）
+    window.onload = async function() {
+        await loadConfig(); // 優先完成設定載入
+
+        const adminStatus = localStorage.getItem("isLoggedIn");
+        if (!adminStatus || adminStatus.trim() !== "true") {
+            alert("未經授權，請先登入！");
+            window.location.href = "login.html";
+        } else {
+            document.body.style.display = "block";
+            fetchTableData();
+            buildFormFields();
+        }
+    }
+
+    function logout() {
+        if(confirm("確定要登出管理員後台嗎？")) {
+            localStorage.removeItem("admin_login");
+            window.location.href = "login.html";
+        }
+    }
+
+    function switchTable(tableName) {
+        currentTable = tableName;
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        
+        // 控制 CSV 區域顯示
+        document.getElementById('csvBatchArea').style.display = (tableName === 'private_messages') ? 'flex' : 'none';
+
+        resetForm();
+        fetchTableData();
+        buildFormFields();
+    }
+
+    async function fetchTableData() {
+        if (!gasUrl) await loadConfig();
+        fetch(gasUrl, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'adminFetchTable', table: currentTable })
+        })
+        .then(res => res.json())
+        .then(resData => {
+            if (resData.status === "success") {
+                currentData = resData.data;
+                renderTable();
+            } else {
+                alert("讀取失敗：" + resData.message);
+            }
+        })
+        .catch(() => alert("連線後端主機失敗，請檢查網路或伺服器狀態。"));
+    }
+
+    function toggleSelectAll(master) {
+        const checkboxes = document.querySelectorAll('.row-checkbox');
+        checkboxes.forEach(cb => cb.checked = master.checked);
+    }
+
+    function renderTable() {
+        const head = document.getElementById('tableHead');
+        const body = document.getElementById('tableBody');
+        head.innerHTML = "";
+        body.innerHTML = "";
+
+        let headRow = `<tr><th width="40"><input type="checkbox" id="selectAllBox" onchange="toggleSelectAll(this)"></th>`;
+        
+        if (currentTable === 'announcements') {
+            headRow += `<th>ID</th><th>日期</th><th>發布者</th><th>標題</th><th>內文摘要</th><th>操作</th></tr>`;
+        } else if (currentTable === 'private_messages') {
+            headRow += `<th>ID</th><th>日期</th><th>發送人</th><th>接收學號</th><th>標題</th><th>內文摘要</th><th>操作</th></tr>`;
+        } else if (currentTable === 'course_resources') {
+            headRow += `<th>ID</th><th>分類</th><th>名稱</th><th>網址</th><th>操作</th></tr>`;
+        } else if (currentTable === 'reports') {
+            headRow += `<th>ID</th><th>時間</th><th>通報人</th><th>類型</th><th>內容摘要</th><th>狀態</th><th>操作</th></tr>`;
+        } else if (currentTable === 'users') {
+            headRow += `<th>學號 (帳號)</th><th>密碼</th><th>姓名 (暱稱)</th><th>首次登入</th><th>電子信箱</th><th>操作</th></tr>`;
+        }
+        head.innerHTML = headRow;
+
+        if (currentData.length === 0) {
+            const colSpan = currentTable === 'users' ? 7 : (currentTable === 'course_resources' ? 6 : 8);
+            body.innerHTML = `<tr><td colspan="${colSpan}" style="text-align:center; color:#999;">目前資料庫中無任何資料。</td></tr>`;
+            return;
+        }
+
+        currentData.forEach((item, index) => {
+            const itemKey = (currentTable === 'users') ? item.username : item.id;
+            let row = `<tr><td><input type="checkbox" class="row-checkbox" value="${itemKey}"></td>`;
+
+            if (currentTable === 'announcements') {
+                row += `<td>${item.id}</td><td>${item.date}</td><td>${item.author}</td><td><b>${item.title}</b></td><td>${subStr(item.content)}</td>`;
+            } else if (currentTable === 'private_messages') {
+                row += `<td>${item.id}</td><td>${item.date}</td><td>${item.sender}</td><td><span class="edit-btn" style="padding:2px 5px; border-radius:3px; color:white; font-size:12px;">${item.username}</span></td><td><b>${item.title}</b></td><td>${subStr(item.content)}</td>`;
+            } else if (currentTable === 'course_resources') {
+                row += `<td>${item.id}</td><td><small style="background:#ecf0f1; padding:3px 6px; border-radius:3px;">${item.category}</small></td><td><b>${item.name}</b></td><td><a href="${item.url}" target="_blank" style="color:#3498db; text-decoration:none;"><i class="fa-solid fa-link"></i> 連結</a></td>`;
+            } else if (currentTable === 'reports') {
+                let statusBadge = item.status === '已處理' ? '<span style="color:green;font-weight:bold;"><i class="fa-solid fa-circle-check"></i> 已處理</span>' : '<span style="color:orange;font-weight:bold;"><i class="fa-solid fa-clock"></i> 待處理</span>';
+                row += `<td>${item.id}</td><td><small>${item.timestamp}</small></td><td>${item.nickname} (${item.username})</td><td>${item.report_type}</td><td>${subStr(item.content)}</td><td>${statusBadge}</td>`;
+            } else if (currentTable === 'users') {
+                row += `<td><code>${item.username}</code></td><td><code>${item.password}</code></td><td><b>${item.nickname}</b></td><td>${item.is_first_login}</td><td>${item.email || '<span style="color:#ccc;">未綁定</span>'}</td>`;
+            }
+
+            row += `<td class="actions-cell">
+                <button class="action-btn edit-btn" onclick="editItem(${index})"><i class="fa-solid fa-pen-to-square"></i></button>
+                <button class="action-btn del-btn" onclick="deleteItem('${itemKey}')"><i class="fa-solid fa-trash-can"></i></button>
+            </td></tr>`;
+            body.innerHTML += row;
+        });
+    }
+
+    function subStr(str) {
+        if(!str) return "";
+        return str.length > 20 ? str.substring(0, 20) + "..." : str;
+    }
+
+    function buildFormFields() {
+        const container = document.getElementById('dynamicFields');
+        container.innerHTML = "";
+
+        let html = "";
+        if (currentTable === 'announcements') {
+            html += `<div class="form-group"><label>日期</label><input type="text" id="field_date" value="${getTodayStr()}" required></div>`;
+            html += `<div class="form-group"><label>發布者</label><input type="text" id="field_author" value="導師" required></div>`;
+            html += `<div class="form-group"><label>公告標題</label><input type="text" id="field_title" placeholder="請輸入標題" required></div>`;
+            html += `<div class="form-group"><label>公告內容</label><textarea id="field_content" placeholder="支援換行輸入..." required></textarea></div>`;
+        } else if (currentTable === 'private_messages') {
+            html += `<div class="form-group"><label>日期</label><input type="text" id="field_date" value="${getTodayStr()}" required></div>`;
+            html += `<div class="form-group"><label>發送人</label><input type="text" id="field_sender" value="導師" required></div>`;
+            html += `<div class="form-group"><label>接收對象學號</label><input type="text" id="field_username" placeholder="請輸入特定學生學號" required></div>`;
+            html += `<div class="form-group"><label>訊息標題</label><input type="text" id="field_title" placeholder="請輸入標題" required></div>`;
+            html += `<div class="form-group"><label>訊息內容</label><textarea id="field_content" placeholder="此內容僅該學號學生登入後可見..." required></textarea></div>`;
+        } else if (currentTable === 'course_resources') {
+            html += `<div class="form-group"><label>分類項目</label><input type="text" id="field_category" placeholder="例如：學習學測、線上工具" required></div>`;
+            html += `<div class="form-group"><label>資源名稱</label><input type="text" id="field_name" placeholder="例如：均一教育平台" required></div>`;
+            html += `<div class="form-group"><label>詳細描述</label><textarea id="field_description" placeholder="選填，留空將套用預設敘述文字"></textarea></div>`;
+            html += `<div class="form-group"><label>網站連結 URL</label><input type="url" id="field_url" placeholder="https://..." required></div>`;
+            html += `<div class="form-group"><label>FontAwesome 圖標類名</label><input type="text" id="field_icon" value="fa-book" placeholder="例如: fa-globe, fa-code"></div>`;
+        } else if (currentTable === 'reports') {
+            html += `<div class="form-group"><label>目前處理狀態更新</label><select id="field_status"><option value="待處理">待處理</option><option value="已處理">已處理</option></select></div>`;
+            html += `<p style="color:#7f8c8d; font-size:13px; line-height:1.5;">💡 提示：回報內容與時間由系統核心及學生前端自主觸發產生，在此處管理員僅可調整修訂該事件的「處理進度狀態」。</p>`;
+        } else if (currentTable === 'users') {
+            html += `<div class="form-group"><label>學生學號 (充當登入帳號)</label><input type="text" id="field_username" placeholder="請輸入 6 碼數字學號" required></div>`;
+            html += `<div class="form-group"><label>登入密碼</label><input type="text" id="field_password" placeholder="預設一般為身分證字號或自訂" required></div>`;
+            html += `<div class="form-group"><label>學生姓名 (系統顯示暱稱)</label><input type="text" id="field_nickname" placeholder="請輸入真實姓名" required></div>`;
+            html += `<div class="form-group"><label>強制首次登入狀態</label><select id="field_is_first_login"><option value="true">true (要求其必須先更正資訊)</option><option value="false">false (常規正常帳號狀態)</option></select></div>`;
+            html += `<div class="form-group"><label>電子郵件信箱</label><input type="email" id="field_email" placeholder="學生的重設驗證碼信箱，選填"></div>`;
+        }
+        container.innerHTML = html;
+    }
+
+    function getTodayStr() {
+        const now = new Date();
+        const y = now.getFullYear();
+        let m = now.getMonth() + 1;
+        let d = now.getDate();
+        if(m<10) m = '0'+m;
+        if(d<10) d = '0'+d;
+        return `${y}/${m}/${d}`;
+    }
+
+    async function saveItem(e) {
+        e.preventDefault();
+        if (!gasUrl) await loadConfig();
+
+        const id = document.getElementById('itemId').value;
+        const data = {};
+
+        if (currentTable === 'announcements') {
+            data.date = document.getElementById('field_date').value;
+            data.author = document.getElementById('field_author').value;
+            data.title = document.getElementById('field_title').value;
+            data.content = document.getElementById('field_content').value;
+        } else if (currentTable === 'private_messages') {
+            data.date = document.getElementById('field_date').value;
+            data.sender = document.getElementById('field_sender').value;
+            data.username = document.getElementById('field_username').value;
+            data.title = document.getElementById('field_title').value;
+            data.content = document.getElementById('field_content').value;
+        } else if (currentTable === 'course_resources') {
+            data.category = document.getElementById('field_category').value;
+            data.name = document.getElementById('field_name').value;
+            data.description = document.getElementById('field_description').value;
+            data.url = document.getElementById('field_url').value;
+            data.icon = document.getElementById('field_icon').value;
+        } else if (currentTable === 'reports') {
+            data.status = document.getElementById('field_status').value;
+        } else if (currentTable === 'users') {
+            data.username = document.getElementById('field_username').value;
+            data.password = document.getElementById('field_password').value;
+            data.nickname = document.getElementById('field_nickname').value;
+            data.is_first_login = document.getElementById('field_is_first_login').value;
+            data.email = document.getElementById('field_email').value;
+        }
+
+        fetch(gasUrl, {
+            method: 'POST',
+            body: JSON.stringify({
+                action: 'adminSaveItem',
+                table: currentTable,
+                id: id || null,
+                data: data
+            })
+        })
+        .then(res => res.json())
+        .then(resData => {
+            alert(resData.message);
+            if (resData.status === "success") {
+                resetForm();
+                fetchTableData();
+            }
+        });
+    }
+
+    function editItem(index) {
+        const item = currentData[index];
+        document.getElementById('formTitle').innerText = "編輯項目";
+        
+        if (currentTable === 'users') {
+            document.getElementById('itemId').value = item.username;
+            buildFormFields();
+            document.getElementById('field_username').value = item.username;
+            document.getElementById('field_username').disabled = true; 
+            document.getElementById('field_password').value = item.password;
+            document.getElementById('field_nickname').value = item.nickname;
+            document.getElementById('field_is_first_login').value = item.is_first_login;
+            document.getElementById('field_email').value = item.email || "";
+        } else {
+            document.getElementById('itemId').value = item.id;
+            buildFormFields();
+            if (currentTable === 'announcements') {
+                document.getElementById('field_date').value = item.date;
+                document.getElementById('field_author').value = item.author;
+                document.getElementById('field_title').value = item.title;
+                document.getElementById('field_content').value = item.content;
+            } else if (currentTable === 'private_messages') {
+                document.getElementById('field_date').value = item.date;
+                document.getElementById('field_sender').value = item.sender;
+                document.getElementById('field_username').value = item.username;
+                document.getElementById('field_title').value = item.title;
+                document.getElementById('field_content').value = item.content;
+            } else if (currentTable === 'course_resources') {
+                document.getElementById('field_category').value = item.category;
+                document.getElementById('field_name').value = item.name;
+                document.getElementById('field_description').value = item.description;
+                document.getElementById('field_url').value = item.url;
+                document.getElementById('field_icon').value = item.icon;
+            } else if (currentTable === 'reports') {
+                document.getElementById('field_status').value = item.status;
+            }
+        }
+    }
+
+    async function deleteItem(id) {
+        if (!gasUrl) await loadConfig();
+
+        let confirmMsg = `您確定要永久刪除項目 [${id}] 嗎？此操作無法復原。`;
+        if (currentTable === 'users') {
+            confirmMsg = `⚠️ 警告！您正準備從資料庫中永久抹除帳號：[ ${id} ]。確定要繼續？`;
+        }
+        
+        if (!confirm(confirmMsg)) return;
+
+        const pw = prompt("請輸入防呆刪除密碼：");
+        if (pw === null) return; 
+        if (pw.trim() === "") return alert("密碼不得為空！已取消操作。");
+
+        fetch(gasUrl, { 
+            method: 'POST', 
+            body: JSON.stringify({ action: 'adminDeleteItem', table: currentTable, id: id, deletePassword: pw.trim() }) 
+        })
+        .then(res => res.json())
+        .then(resData => {
+            alert(resData.message);
+            if (resData.status === "success") {
+                fetchTableData();
+                resetForm();
+            }
+        });
+    }
+
+    async function batchDeleteItems() {
+        if (!gasUrl) await loadConfig();
+
+        const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+        if (checkedBoxes.length === 0) {
+            return alert("請先勾選想要刪除的項目！");
+        }
+
+        const idsToDelete = Array.from(checkedBoxes).map(cb => cb.value);
+        
+        let confirmMsg = `您確定要永久刪除選取的 ${idsToDelete.length} 筆資料嗎？此操作無法復原。`;
+        if (currentTable === 'users') {
+            confirmMsg = `⚠️ 嚴重警告！您正準備批量抹除 ${idsToDelete.length} 個學生帳號。確定要繼續？`;
+        }
+
+        if (!confirm(confirmMsg)) return;
+
+        const pw = prompt(`請輸入防呆刪除密碼以確認批量刪除 ${idsToDelete.length} 筆項目：`);
+        if (pw === null) return;
+        if (pw.trim() === "") return alert("密碼不得為空！已取消操作。");
+
+        fetch(gasUrl, {
+            method: 'POST',
+            body: JSON.stringify({
+                action: 'adminBatchDeleteItems',
+                table: currentTable,
+                ids: idsToDelete,
+                deletePassword: pw.trim()
+            })
+        })
+        .then(res => res.json())
+        .then(resData => {
+            alert(resData.message);
+            if (resData.status === "success") {
+                const selectAllBox = document.getElementById('selectAllBox');
+                if(selectAllBox) selectAllBox.checked = false;
+                
+                fetchTableData();
+                resetForm();
+            }
+        })
+        .catch(() => alert("連線後端發生異常，批量刪除動作失敗。"));
+    }
+
+    function resetForm() {
+        document.getElementById('formTitle').innerText = "新增項目";
+        document.getElementById('itemId').value = "";
+        document.getElementById('itemForm').reset();
+        buildFormFields();
+        const selectAllBox = document.getElementById('selectAllBox');
+        if(selectAllBox) selectAllBox.checked = false;
+    }
+
+    async function handleCsvUpload() {
+        if (!gasUrl) await loadConfig();
+
+        const fileInput = document.getElementById('csvFileInput');
+        const file = fileInput.files[0];
+        if (!file) return alert("請先選擇要上傳的 CSV 檔案。");
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const text = e.target.result;
+            const lines = text.split(/\r?\n/);
+            const messages = [];
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue; 
+
+                const cols = line.split(',');
+                if (cols.length < 5) continue; 
+
+                messages.push({
+                    date: cols[0].trim(),
+                    sender: cols[1].trim(),
+                    username: cols[2].trim(),
+                    title: cols[3].trim(),
+                    content: cols[4].trim()
+                });
+            }
+
+            if(messages.length === 0) return alert("未在檔案中解析出任何有效數據。");
+
+            if(!confirm(`解析完成！共偵測到 ${messages.length} 筆個人私訊，是否確認上傳導入資料庫？`)) return;
+
+            fetch(gasUrl, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'adminBatchPrivateMessages', messages: messages })
+            })
+            .then(res => res.json())
+            .then(resData => {
+                alert(resData.message);
+                fileInput.value = "";
+                fetchTableData();
+            })
+            .catch(() => alert("連線後端發布失敗，請確認後端狀態。"));
+        };
+
+        reader.readAsText(file, 'utf-8');
+    }
+</script>
+</body>
+</html>
