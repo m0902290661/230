@@ -130,7 +130,6 @@
             color: #999;
         }
 
-        /* 💡 密碼顯示/隱藏專用樣式 */
         .password-wrapper {
             position: relative;
             display: flex;
@@ -165,15 +164,15 @@
             width: 20px;
             height: 20px;
         }
-
     </style>
 </head>
 
 <body>
 
     <div class="login-container">
+        <!-- 一般登入區塊 -->
         <div id="loginBlock">
-            <img style="height: 24px; border-radius: 5px;" src="logo.png" alt="">
+            <img style="height: 24px; border-radius: 5px;" src="logo.png" alt="" onerror="this.style.display='none';">
             <h2>高二智系統登入</h2>
             <form id="loginForm">
                 <div class="input-group">
@@ -199,6 +198,7 @@
             </form>
         </div>
 
+        <!-- 首次登入修改密碼區塊 -->
         <div id="firstLoginBlock" class="hidden">
             <h2>首次登入設定</h2>
             <p style="font-size: 14px; color: #666; text-align: center;">偵測到您是首次登入，請先修改密碼並綁定電子郵件。</p>
@@ -235,6 +235,7 @@
             </form>
         </div>
 
+        <!-- 忘記密碼/重設密碼區塊 -->
         <div id="forgotPasswordBlock" class="hidden">
             <h2>重設密碼</h2>
             <p style="font-size: 13px; color: #666; text-align: center;">請輸入帳號來獲取寄送到綁定信箱的驗證碼。</p>
@@ -286,6 +287,7 @@
             </form>
         </div>
 
+        <!-- 狀態回報訊息區 -->
         <div id="message"></div>
 
         <div class="footer">
@@ -299,7 +301,7 @@
 
     <script src="auth.js"></script>
     <script>
-        let gasUrl = ""; // 用來儲存從 json 抓到的 API 網址
+        let gasUrl = ""; 
 
         let userSession = {
             username: "",
@@ -316,7 +318,7 @@
             button.textContent = isLoading ? loadingText : button.dataset.originalText;
         }
 
-        // 當網頁載入時，自動抓取 api.json
+        // 當網頁載入時，自動抓取 api.json[cite: 5]
         window.addEventListener('DOMContentLoaded', () => {
             fetch('api.json')
                 .then(response => {
@@ -334,7 +336,7 @@
                 });
         });
 
-        // --- 處理一般登入 ---
+        // --- 處理一般登入 ---[cite: 5]
         document.getElementById('loginForm').addEventListener('submit', function (e) {
             e.preventDefault();
             const submitBtn = this.querySelector('button[type="submit"]');
@@ -377,9 +379,17 @@
                             messageDiv.textContent = "登入成功，正在導向主頁...";
                             messageDiv.className = "success";
 
+                            // 建立一般登入快取驗證憑證[cite: 3]
                             await AuthGuard.createSession(username, data.nickname, password, "student");
 
-                            setTimeout(() => { window.location.href = "index.html"; }, 1000);
+                            // 👑 樹莓派新邏輯：判定是否為管理員帳號（學號 >= 493028）
+                            setTimeout(() => { 
+                                if (data.role === "admin") {
+                                    window.location.href = "admin.html"; 
+                                } else {
+                                    window.location.href = "index.html"; 
+                                }
+                            }, 1000);
                         }
                     } else {
                         messageDiv.textContent = data.message;
@@ -395,7 +405,7 @@
                 });
         });
 
-        // --- 處理首次登入的資料更新 ---
+        // --- 處理首次登入的資料更新 ---[cite: 5]
         document.getElementById('profileForm').addEventListener('submit', function (e) {
             e.preventDefault();
             const submitBtn = this.querySelector('button[type="submit"]');
@@ -451,7 +461,7 @@
                 });
         });
 
-        // --- 💡 忘記密碼介面切換邏輯 ---
+        // --- 忘記密碼介面切換邏輯 ---[cite: 5]
         const loginBlock = document.getElementById('loginBlock');
         const forgotPasswordBlock = document.getElementById('forgotPasswordBlock');
         
@@ -468,7 +478,7 @@
             messageDiv.textContent = "";
         });
 
-        // --- 💡 步驟1：發送驗證碼 ---
+        // --- 步驟1：發送驗證碼 ---[cite: 5]
         document.getElementById('sendCodeBtn').addEventListener('click', function() {
             const usernameInput = document.getElementById('forgotUsername');
             const username = usernameInput.value.trim();
@@ -499,7 +509,6 @@
                     messageDiv.textContent = `${data.message} 已寄至：${data.maskedEmail}`;
                     messageDiv.className = "success";
                     
-                    // 鎖定帳號欄位，並啟用下方的輸入表單
                     usernameInput.disabled = true;
                     document.getElementById('resetCode').disabled = false;
                     document.getElementById('forgotNewPassword').disabled = false;
@@ -518,7 +527,7 @@
             });
         });
 
-        // --- 💡 步驟2：驗證並提交重設密碼 ---
+        // --- 步驟2：驗證並提交重設密碼 ---[cite: 5]
         document.getElementById('resetPasswordForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const submitBtn = document.getElementById('resetSubmitBtn');
@@ -557,7 +566,6 @@
                     messageDiv.textContent = data.message;
                     messageDiv.className = "success";
                     
-                    // 重置表單狀態並切換回登入畫面
                     setTimeout(() => {
                         document.getElementById('resetPasswordForm').reset();
                         document.getElementById('forgotUsername').disabled = false;
@@ -585,7 +593,7 @@
             });
         });
 
-        // --- 💡 處理所有密碼顯示與隱藏點擊邏輯 ---
+        // --- 處理密碼眼睛顯示與隱藏點擊邏輯 ---[cite: 5]
         document.querySelectorAll('.toggle-password').forEach(button => {
             button.addEventListener('click', function() {
                 const targetId = this.getAttribute('data-target');
@@ -608,7 +616,6 @@
             });
         });
     </script>
-
 </body>
 
 </html>
