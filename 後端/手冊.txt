@@ -1,0 +1,11 @@
+手動開啟服務（上課或需要用系統時）：
+sudo systemctl start class_system.service
+
+手動關閉服務（下課或想節省樹莓派效能時）：
+sudo systemctl stop class_system.service
+
+檢查目前到底有沒有開成功（查看狀態）：
+sudo systemctl status class_system.service
+
+通道
+cloudflared tunnel run --token eyJhIjoiMWQ4NDgyNmQzYzU4NGNlNTdkMWJjNmNmZmUyMDNlZDIiLCJ0IjoiZjFiMmUwOGMtOGQzMi00YTlmLTg4MzMtZGQ0NTViZGMwODFmIiwicyI6Ik5ETmhOR1V4TWpFdFpUaGxNaTAwWlRFNExUaG1PV0l0WXpWak5qaGlaRGczWWprMSJ9
