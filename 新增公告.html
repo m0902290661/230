@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新增班級公告 - 高二智班務系統</title>
+    <link rel="icon" type="image/png" href="logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --primary-hover: #2980b9;
+            --dark-color: #2c3e50;
+            --light-bg: #f8f9fa;
+            --border-color: #e0e0e0;
+            --orange-color: #e67e22;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            padding: 35px 30px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .identity-status {
+            font-size: 14px;
+            color: #666;
+            background-color: #f1f5f9;
+            padding: 6px 16px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .identity-status.verified {
+            background-color: #e8f8f0;
+            color: var(--success-color);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--dark-color);
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 140px;
+            line-height: 1.6;
+        }
+
+        /* 驗證碼區塊 */
+        .captcha-wrapper {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .captcha-canvas {
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            background: #fdfdfd;
+            height: 42px;
+        }
+
+        .btn-refresh {
+            background: none;
+            border: none;
+            color: #777;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 5px;
+            transition: color 0.2s;
+        }
+
+        .btn-refresh:hover {
+            color: var(--primary-color);
+        }
+
+        /* 按鈕群組 */
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--orange-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #d35400;
+        }
+
+        .btn-secondary {
+            background-color: #ecf0f1;
+            color: var(--dark-color);
+            text-decoration: none;
+        }
+
+        .btn-secondary:hover {
+            background-color: #bdc3c7;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* 提示訊息 */
+        .alert {
+            padding: 12px 15px;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert-danger {
+            background-color: #fde8e8;
+            color: var(--danger-color);
+            border: 1px solid #f8b4b4;
+        }
+
+        .alert-success {
+            background-color: #def7ec;
+            color: var(--success-color);
+            border: 1px solid #84e1bc;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1><i class="fa-solid fa-bullhorn" style="color: var(--orange-color);"></i> 新增班級公告</h1>
+            <div class="identity-status" id="identityStatus">
+                <i class="fa-solid fa-spinner fa-spin"></i> 取得身份中...
+            </div>
+        </div>
+
+        <div id="alertBox" class="alert"></div>
+
+        <form id="announcementForm" onsubmit="event.preventDefault(); submitAnnouncement();">
+            <div class="form-group">
+                <label for="titleInput"><i class="fa-solid fa-heading"></i> 公告標題</label>
+                <input type="text" id="titleInput" class="form-control" placeholder="請輸入簡明扼要的標題" required>
+            </div>
+
+            <div class="form-group">
+                <label for="contentInput"><i class="fa-solid fa-align-left"></i> 公告內容</label>
+                <textarea id="contentInput" class="form-control" placeholder="請詳細說明公告事宜..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="captchaInput"><i class="fa-solid fa-shield-halved"></i> 安全驗證碼</label>
+                <div class="captcha-wrapper">
+                    <input type="text" id="captchaInput" class="form-control" placeholder="輸入右側驗證碼" maxlength="4" required style="flex: 1;">
+                    <canvas id="captchaCanvas" class="captcha-canvas" width="100" height="42" onclick="generateCaptcha()" title="點擊重新產生驗證碼"></canvas>
+                    <button type="button" class="btn-refresh" onclick="generateCaptcha()" title="重新產生驗證碼">
+                        <i class="fa-solid fa-rotate-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <a href="index.html" class="btn btn-secondary">
+                    <i class="fa-solid fa-arrow-left"></i> 返回首頁
+                </a>
+                <button type="submit" id="submitBtn" class="btn btn-primary">
+                    <i class="fa-solid fa-paper-plane"></i> 發布公告
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script src="auth.js"></script>
+    <script>
+        let backendUrl = "";
+        let currentUser = null;
+        let generatedCaptcha = "";
+
+        // 頁面載入與身份確認
+        window.onload = async function () {
+            generateCaptcha();
+
+            // 1. 登入檢查 (需要 AuthGuard 模組支援)
+            if (typeof AuthGuard !== "undefined") {
+                const session = await AuthGuard.requireSession("login.html");
+                if (!session) return;
+                
+                currentUser = {
+                    username: session.username,
+                    nickname: session.nickname || session.username,
+                    role: session.role || "student"
+                };
+            } else {
+                // 備用示範身分 (若未引入 AuthGuard 時)
+                currentUser = { username: "guest", nickname: "幹部/老師", role: "admin" };
+            }
+
+            // 更新身分顯示狀態
+            const statusEl = document.getElementById("identityStatus");
+            statusEl.classList.add("verified");
+            statusEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> 發布者：${currentUser.nickname}`;
+
+            // 2. 讀取 API 設定檔 (與 index.html 保持一致)
+            try {
+                const res = await fetch('api.json');
+                const config = await res.json();
+                backendUrl = config.GAS_WEB_APP_URL || config.API_URL;
+            } catch (err) {
+                console.warn("未檢測到 api.json 或讀取失敗，預設連接本地 Python Flask API");
+                backendUrl = "http://localhost:5000/"; // 對應 app.py 端點
+            }
+        };
+
+        // 畫布產生 Canvas 圖形驗證碼
+        function generateCaptcha() {
+            const canvas = document.getElementById('captchaCanvas');
+            const ctx = canvas.getContext('2d');
+            const chars = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"; // 排除易混淆字元
+            generatedCaptcha = "";
+
+            for (let i = 0; i < 4; i++) {
+                generatedCaptcha += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#f1f5f9";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 隨機干擾線
+            for (let i = 0; i < 3; i++) {
+                ctx.strokeStyle = `rgba(52, 152, 219, ${Math.random() * 0.4 + 0.2})`;
+                ctx.beginPath();
+                ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
+                ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
+                ctx.stroke();
+            }
+
+            // 繪製扭曲文字
+            ctx.font = "bold 20px 'Noto Sans TC', sans-serif";
+            ctx.fillStyle = "#2c3e50";
+            for (let i = 0; i < generatedCaptcha.length; i++) {
+                ctx.save();
+                ctx.translate(18 + i * 20, 28);
+                ctx.rotate((Math.random() - 0.5) * 0.4);
+                ctx.fillText(generatedCaptcha[i], 0, 0);
+                ctx.restore();
+            }
+        }
+
+        // 訊息提示彈窗
+        function showAlert(msg, isSuccess = false) {
+            const alertBox = document.getElementById("alertBox");
+            alertBox.className = `alert ${isSuccess ? 'alert-success' : 'alert-danger'}`;
+            alertBox.innerHTML = `<i class="fa-solid ${isSuccess ? 'fa-circle-check' : 'fa-circle-exclamation'}"></i> ${msg}`;
+            alertBox.style.display = "block";
+        }
+
+        // 提交表單主流程
+        async function submitAnnouncement() {
+            const title = document.getElementById("titleInput").value.trim();
+            const content = document.getElementById("contentInput").value.trim();
+            const captchaInput = document.getElementById("captchaInput").value.trim().toUpperCase();
+            const submitBtn = document.getElementById("submitBtn");
+
+            // 1. 欄位驗證
+            if (!title || !content) {
+                showAlert("請填寫完整的標題與內容！");
+                return;
+            }
+
+            if (captchaInput !== generatedCaptcha) {
+                showAlert("圖形驗證碼輸入錯誤，請重新輸入！");
+                generateCaptcha();
+                document.getElementById("captchaInput").value = "";
+                return;
+            }
+
+            // 2. 準備發送 Payload (搭配 app.py adminSaveItem 或專屬新增邏輯)
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> 發布中...`;
+
+            // 當前日期格式 (YYYY/MM/DD)
+            const today = new Date();
+            const dateStr = `${today.getFullYear()}/${String(today.getMonth() + 1).padStart(2, '0')}/${String(today.getDate()).padStart(2, '0')}`;
+
+            const payload = {
+                action: "adminSaveItem",
+                table: "announcements",
+                data: {
+                    date: dateStr,
+                    author: currentUser ? currentUser.nickname : "班幹部",
+                    title: title,
+                    content: content
+                }
+            };
+
+            try {
+                const response = await fetch(backendUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.status === "success") {
+                    showAlert("公告新增成功！即將為您跳轉回到班務首頁...", true);
+                    setTimeout(() => {
+                        window.location.href = "index.html";
+                    }, 1500);
+                } else {
+                    showAlert(`發布失敗：${result.message || '伺服器發生錯誤'}`);
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> 發布公告`;
+                }
+            } catch (err) {
+                console.error(err);
+                showAlert("連線伺服器失敗，請檢查網路狀態或後端服務是否運作。");
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> 發布公告`;
+            }
+        }
+    </script>
+</body>
+
+</html>
