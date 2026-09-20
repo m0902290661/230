@@ -1,91 +1,104 @@
 /**
- * AuthGuard - 前端身分驗證與持久性 Session 管理模組
+ * auth.js - 高二智班務系統 身份驗證與狀態管理模組
  */
-const AuthGuard = (function () {
-    const STORAGE_KEY = "shs_user_session";
-    const READ_ANNOUNCEMENTS_KEY = "shs_read_announcements";
-    const READ_PRIVATE_MSGS_KEY = "shs_read_private_messages";
 
-    function getStoredSession() {
+const AuthGuard = {
+    // Session Key 定義
+    SESSION_KEY: "user_session",
+
+    /**
+     * 取得目前登入者的 Session 資料
+     * @returns {Object|null} 使用者物件或 null
+     */
+    getSession: function () {
         try {
-            const data = localStorage.getItem(STORAGE_KEY);
-            return data ? JSON.parse(data) : null;
+            const sessionData = localStorage.getItem(this.SESSION_KEY) || sessionStorage.getItem(this.SESSION_KEY);
+            return sessionData ? JSON.parse(sessionData) : null;
         } catch (e) {
             console.error("讀取 Session 失敗:", e);
             return null;
         }
-    }
+    },
 
-    function setStoredSession(session) {
+    /**
+     * 驗證頁面存取權限 (若未登入則自動跳轉)
+     * @param {string} loginUrl 跳轉的登入頁面路徑
+     * @returns {Object|null} 使用者 Session 物件
+     */
+    requireSession: async function (loginUrl = "login.html") {
+        const session = this.getSession();
+        if (!session || !session.username) {
+            alert("請先登入系統！");
+            window.location.href = loginUrl;
+            return null;
+        }
+        return session;
+    },
+
+    /**
+     * 清除使用者登入狀態 (登出)
+     */
+    clearSession: function () {
+        localStorage.removeItem(this.SESSION_KEY);
+        sessionStorage.removeItem(this.SESSION_KEY);
+    },
+
+    // ==========================================
+    // 🔔 公告與私人訊息「已讀 / 未讀」狀態管理
+    // ==========================================
+
+    /**
+     * 檢查指定項目是否已讀
+     * @param {string} type 項目類型 ('announcement' 或 'privateMsg')
+     * @param {string} id 項目唯一識別碼 (或標題+日期組合)
+     * @returns {boolean} 是否已讀
+     */
+    isRead: function (type, id) {
+        if (!id) return false;
         try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+            const storageKey = `read_${type}`;
+            const readList = JSON.parse(localStorage.getItem(storageKey) || "[]");
+            return readList.includes(String(id));
         } catch (e) {
-            console.error("儲存 Session 失敗:", e);
+            console.error("讀取已讀狀態失敗:", e);
+            return false;
+        }
+    },
+
+    /**
+     * 將指定項目標記為已讀
+     * @param {string} type 項目類型 ('announcement' 或 'privateMsg')
+     * @param {string} id 項目唯一識別碼 (或標題+日期組合)
+     */
+    markAsRead: function (type, id) {
+        if (!id) return;
+        try {
+            const storageKey = `read_${type}`;
+            let readList = JSON.parse(localStorage.getItem(storageKey) || "[]");
+            const stringId = String(id);
+            
+            if (!readList.includes(stringId)) {
+                readList.push(stringId);
+                localStorage.setItem(storageKey, JSON.stringify(readList));
+            }
+        } catch (e) {
+            console.error("寫入已讀狀態失敗:", e);
+        }
+    },
+
+    /**
+     * 清除指定類型的已讀紀錄 (用於測試或重置)
+     * @param {string} type 項目類型 ('announcement' 或 'privateMsg')
+     */
+    clearReadStatus: function (type) {
+        if (type) {
+            localStorage.removeItem(`read_${type}`);
+        } else {
+            localStorage.removeItem("read_announcement");
+            localStorage.removeItem("read_privateMsg");
         }
     }
+};
 
-    return {
-        createSession: async function (username, nickname, password, role = "student") {
-            const session = {
-                username: username,
-                nickname: nickname || username,
-                role: role,
-                loginTime: new Date().getTime()
-            };
-            setStoredSession(session);
-            return session;
-        },
-
-        validateSession: async function () {
-            const session = getStoredSession();
-            if (!session || !session.username) {
-                return { valid: false, reason: "NO_SESSION" };
-            }
-            return {
-                valid: true,
-                username: session.username,
-                nickname: session.nickname,
-                role: session.role
-            };
-        },
-
-        requireSession: async function (redirectUrl = "login.html") {
-            const result = await this.validateSession();
-            if (!result.valid) {
-                window.location.href = redirectUrl;
-                return null;
-            }
-            return result;
-        },
-
-        clearSession: function () {
-            localStorage.removeItem(STORAGE_KEY);
-            localStorage.removeItem("admin_login");
-            localStorage.removeItem("user_role");
-        },
-
-        // 🔔 通知與已讀狀態管理
-        getReadIds: function (key) {
-            try {
-                const data = localStorage.getItem(key);
-                return data ? JSON.parse(data) : [];
-            } catch (e) {
-                return [];
-            }
-        },
-
-        markAsRead: function (type, id) {
-            const key = type === 'announcement' ? READ_ANNOUNCEMENTS_KEY : READ_PRIVATE_MSGS_KEY;
-            const readIds = this.getReadIds(key);
-            if (!readIds.includes(String(id))) {
-                readIds.push(String(id));
-                localStorage.setItem(key, JSON.stringify(readIds));
-            }
-        },
-
-        isRead: function (type, id) {
-            const key = type === 'announcement' ? READ_ANNOUNCEMENTS_KEY : READ_PRIVATE_MSGS_KEY;
-            return this.getReadIds(key).includes(String(id));
-        }
-    };
-})();
+// 匯出至全域環境
+window.AuthGuard = AuthGuard;
