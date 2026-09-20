@@ -14,7 +14,6 @@
         :root {
             --sidebar-width: 260px;
             --primary-color: #3498db;
-            --primary-hover: #2980b9;
             --dark-color: #2c3e50;
             --light-bg: #f8f9fa;
             --text-color: #333;
@@ -360,7 +359,7 @@
             margin-bottom: 15px;
         }
 
-        /* 🔔 首頁卡片未讀提示點 */
+        /* 🔔 靜態卡片未讀提示點 */
         .card-unread-dot {
             position: absolute;
             top: 12px;
@@ -372,121 +371,6 @@
             padding: 3px 8px;
             border-radius: 12px;
             display: none;
-        }
-
-        /* --- 公用元件 --- */
-        .section-title {
-            font-size: 24px;
-            color: var(--dark-color);
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .loading-text {
-            text-align: center;
-            color: #888;
-            padding: 40px 20px;
-            font-size: 16px;
-        }
-
-        /* --- 課程資源網格與卡片外觀 --- */
-        .resources-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .resource-item-card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            transition: all 0.2s ease;
-        }
-
-        .resource-item-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            border-color: var(--primary-color);
-        }
-
-        .resource-main {
-            display: flex;
-            gap: 15px;
-            align-items: flex-start;
-            margin-bottom: 15px;
-        }
-
-        .resource-icon-box {
-            width: 45px;
-            height: 45px;
-            background-color: #f0f3f6;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--primary-color);
-            font-size: 20px;
-            flex-shrink: 0;
-        }
-
-        .resource-tag {
-            display: inline-block;
-            background-color: #e8f4fd;
-            color: var(--primary-color);
-            font-size: 12px;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-weight: 500;
-            margin-bottom: 6px;
-        }
-
-        .resource-detail h3 {
-            font-size: 16px;
-            color: var(--dark-color);
-            margin-bottom: 5px;
-        }
-
-        .resource-detail p {
-            font-size: 13px;
-            color: #666;
-            line-height: 1.5;
-        }
-
-        .resource-action-btn {
-            width: 100%;
-            padding: 8px;
-            background-color: #f8f9fa;
-            border: 1px solid var(--border-color);
-            color: var(--dark-color);
-            border-radius: 4px;
-            cursor: pointer;
-            text-align: center;
-            font-size: 13px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-            text-decoration: none;
-            transition: all 0.2s;
-        }
-
-        .resource-action-btn:hover {
-            background-color: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-        }
-
-        /* 關鍵字輸入框聚焦外觀 */
-        #resourceSearchInput:focus {
-            border-color: var(--primary-color) !important;
-            box-shadow: 0 0 8px rgba(52, 152, 219, 0.2);
         }
 
         /* --- 訊息清單排版 --- */
@@ -608,6 +492,134 @@
             color: #95a5a6;
         }
 
+        /* --- 彈出視窗（更新日誌 Modal）樣式 --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-container {
+            background: #fff;
+            width: 90%;
+            max-width: 550px;
+            max-height: 80vh;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-container {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            padding: 16px 20px;
+            background: var(--dark-color);
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 18px;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-close-btn {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .modal-close-btn:hover {
+            opacity: 1;
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            line-height: 1.6;
+            color: var(--text-color);
+        }
+
+        .changelog-item {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .changelog-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .changelog-tag {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-bottom: 6px;
+        }
+
+        .changelog-date {
+            font-size: 13px;
+            color: #888;
+            margin-left: 8px;
+        }
+
+        .changelog-list {
+            margin-top: 8px;
+            padding-left: 20px;
+            font-size: 14px;
+        }
+
+        .changelog-list li {
+            margin-bottom: 4px;
+        }
+
+        .version-link {
+            color: var(--primary-color);
+            cursor: pointer;
+            text-decoration: underline;
+            transition: color 0.2s;
+        }
+
+        .version-link:hover {
+            color: #1d6fa5;
+        }
+
         @media (max-width: 768px) {
             body { flex-direction: column; }
             .sidebar { position: fixed; left: calc(-1 * var(--sidebar-width)); top: 0; bottom: 0; width: var(--sidebar-width); height: 100vh; }
@@ -702,7 +714,7 @@
                     <h1>嗨，<span id="nameDisplay" style="color: var(--primary-color);"></span>！</h1>
                     <p>歡迎來到高二智班務系統。請點選下方功能卡片或常用連結開始使用。</p>
                     <p>本系統由 許元洧 維護，若有問題請 <a style="color: black;text-decoration: underline;" href="問題回報.html">通報</a></p>
-                    <p>v 202609201300</p>
+                    <p>v <a class="version-link" onclick="openChangelogModal()" title="點擊查看更新內容">202609201300</a></p>
                 </div>
 
                 <div class="features-grid">
@@ -749,7 +761,7 @@
                         <i class="fa-brands fa-google-drive" style="color:var(--green-color);"></i>
                         <div class="link-info"><h4>歷程雲端</h4><p>學習歷程檔案資料夾</p></div>
                     </div>
-                    <div class="link-card" onclick="window.open('https://portal.k12.ntut.edu.tw/', '_blank')">
+                    <div class="link-card" onclick="window.open('https://gohsa.k12ea.gov.tw/', '_blank')">
                         <i class="fa-solid fa-graduation-cap" style="color:var(--primary-color);"></i>
                         <div class="link-info"><h4>校務系統</h4><p>國教署智慧校務平台</p></div>
                     </div>
@@ -789,6 +801,32 @@
         </main>
     </div>
 
+    <!-- 💡 更新日誌 Modal 視窗 -->
+    <div class="modal-overlay" id="changelogModal" onclick="closeChangelogModal(event)">
+        <div class="modal-container" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-clock-rotate-left"></i> 系統更新日誌</h3>
+                <button class="modal-close-btn" onclick="closeChangelogModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="changelog-item">
+                    <div>
+                        <span class="changelog-tag">v 202609201300</span>
+                        <span class="changelog-date">2026-09-20</span>
+                    </div>
+                    <ul class="changelog-list">
+                        <li>新增「點擊查看更新內容」對話盒功能。</li>
+                        <li>優化系統載入與啟動動畫體驗。</li>
+                        <li>改善手機端 UI 排版與側邊欄切換。</li>
+                        <li>加入訊息未讀提示功能。</li>
+                        <li>取消登入時效密鑰。</li>
+                        <li>加強admin.html安全性。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="sidebarOverlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.4); z-index:90;"></div>
 
     <script src="auth.js"></script>
@@ -798,7 +836,6 @@
         let allResourcesData = [];
         const loaderStartTime = Date.now();
 
-        // 自動識別文本中的 URL 並轉換為開新分頁的 <a> 標籤
         function linkify(text) {
             if (!text) return "";
             const urlRegex = /(https?:\/\/[^\s<]+)/g;
@@ -844,11 +881,6 @@
             document.getElementById("nameDisplay").textContent = nickname;
             document.getElementById("navNameDisplay").textContent = `${nickname} (${username})`;
             document.getElementById("avatarDisplay").textContent = nickname.charAt(0);
-
-            // 請求瀏覽器原生推播通知權限
-            if (typeof AuthGuard.requestNotificationPermission === "function") {
-                AuthGuard.requestNotificationPermission();
-            }
 
             fetch('api.json')
                 .then(res => res.json())
@@ -903,21 +935,19 @@
             const sidebarBadge = document.getElementById(type === 'announcement' ? 'sidebarAnnBadge' : 'sidebarMsgBadge');
             const cardBadge = document.getElementById(type === 'announcement' ? 'cardAnnBadge' : 'cardMsgBadge');
 
-            if (sidebarBadge && cardBadge) {
-                if (unreadCount > 0) {
-                    sidebarBadge.style.display = "inline-block";
-                    sidebarBadge.textContent = unreadCount;
-                    cardBadge.style.display = "inline-block";
-                    if (type === 'announcement') cardBadge.textContent = `${unreadCount} 則新公告`;
-                    else cardBadge.textContent = `${unreadCount} 則新訊息`;
-                } else {
-                    sidebarBadge.style.display = "none";
-                    cardBadge.style.display = "none";
-                }
+            if (unreadCount > 0) {
+                sidebarBadge.style.display = "inline-block";
+                sidebarBadge.textContent = unreadCount;
+                cardBadge.style.display = "inline-block";
+                if (type === 'announcement') cardBadge.textContent = `${unreadCount} 則新公告`;
+                else cardBadge.textContent = `${unreadCount} 則新訊息`;
+            } else {
+                sidebarBadge.style.display = "none";
+                cardBadge.style.display = "none";
             }
         }
 
-        // 撈取公開公告
+        // 撈取公開公告並進行未讀與已讀標記
         function loadAnnouncements() {
             if (!gasUrl) return;
             const container = document.getElementById('announcementContainer');
@@ -935,18 +965,15 @@
                     
                     let html = '<div class="msg-list">';
                     let unreadCount = 0;
-                    let latestUnreadTitle = "";
 
                     list.forEach(item => {
                         const itemId = item.id || (item.title + item.date);
-                        const isRead = typeof AuthGuard.isRead === "function" ? AuthGuard.isRead('announcement', itemId) : true;
+                        const isRead = AuthGuard.isRead('announcement', itemId);
 
                         if (!isRead) {
                             unreadCount++;
-                            if (!latestUnreadTitle) latestUnreadTitle = item.title;
-                            if (typeof AuthGuard.markAsRead === "function") {
-                                AuthGuard.markAsRead('announcement', itemId);
-                            }
+                            // 點開瀏覽該公告時自動標記已讀
+                            AuthGuard.markAsRead('announcement', itemId);
                         }
 
                         html += `
@@ -966,19 +993,11 @@
                     });
                     container.innerHTML = html + '</div>';
                     updateUnreadBadges('announcement', unreadCount);
-
-                    // 🔔 若有未讀公告，發送瀏覽器推播通知
-                    if (unreadCount > 0 && typeof AuthGuard.sendNotification === "function") {
-                        AuthGuard.sendNotification(
-                            "📢 高二智班務系統 - 最新公告",
-                            `您有 ${unreadCount} 則未讀公告：${latestUnreadTitle}`
-                        );
-                    }
                 } else { container.innerHTML = `<div class="loading-text" style="color:red;">載入失敗</div>`; }
             }).catch(err => container.innerHTML = '<div class="loading-text">連線失敗</div>');
         }
 
-        // 撈取專屬私訊
+        // 撈取專屬私訊並進行未讀與已讀標記
         function loadPrivateMessages() {
             if (!gasUrl || !currentUserName) return;
             const container = document.getElementById('privateMsgContainer');
@@ -1001,18 +1020,14 @@
 
                     let html = '<div class="msg-list">';
                     let unreadCount = 0;
-                    let latestUnreadTitle = "";
 
                     list.forEach(item => {
                         const itemId = item.id || (item.title + item.date);
-                        const isRead = typeof AuthGuard.isRead === "function" ? AuthGuard.isRead('privateMsg', itemId) : true;
+                        const isRead = AuthGuard.isRead('privateMsg', itemId);
 
                         if (!isRead) {
                             unreadCount++;
-                            if (!latestUnreadTitle) latestUnreadTitle = item.title;
-                            if (typeof AuthGuard.markAsRead === "function") {
-                                AuthGuard.markAsRead('privateMsg', itemId);
-                            }
+                            AuthGuard.markAsRead('privateMsg', itemId);
                         }
 
                         html += `
@@ -1032,20 +1047,11 @@
                     });
                     container.innerHTML = html + '</div>';
                     updateUnreadBadges('privateMsg', unreadCount);
-
-                    // 🔔 若有未讀私人訊息，發送瀏覽器推播通知
-                    if (unreadCount > 0 && typeof AuthGuard.sendNotification === "function") {
-                        AuthGuard.sendNotification(
-                            "✉️ 高二智班務系統 - 個人訊息通知",
-                            `您有 ${unreadCount} 則未讀個人訊息：${latestUnreadTitle}`
-                        );
-                    }
                 } else { container.innerHTML = `<div class="loading-text" style="color:red;">載入失敗：${resData.message}</div>`; }
             })
             .catch(err => { container.innerHTML = '<div class="loading-text" style="color:red;">連線失敗。</div>'; });
         }
 
-        // 撈取課程網站資源
         function loadCourseResources() {
             if (!gasUrl) return;
             const container = document.getElementById('resourcesContainer');
@@ -1118,6 +1124,17 @@
             });
 
             renderResources(filtered);
+        }
+
+        /* --- 💡 更新日誌 Modal 控制邏輯 --- */
+        function openChangelogModal() {
+            const modal = document.getElementById('changelogModal');
+            if (modal) modal.classList.add('active');
+        }
+
+        function closeChangelogModal(event) {
+            const modal = document.getElementById('changelogModal');
+            if (modal) modal.classList.remove('active');
         }
 
         const sidebar = document.getElementById('sidebar');

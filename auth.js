@@ -1,5 +1,5 @@
 /**
- * AuthGuard - 前端身分驗證與持久性 Session 管理模組 (含瀏覽器推播通知)
+ * AuthGuard - 前端身分驗證與持久性 Session 管理模組
  */
 const AuthGuard = (function () {
     const STORAGE_KEY = "shs_user_session";
@@ -64,7 +64,7 @@ const AuthGuard = (function () {
             localStorage.removeItem("user_role");
         },
 
-        // 🔔 已讀狀態紀錄
+        // 🔔 通知與已讀狀態管理
         getReadIds: function (key) {
             try {
                 const data = localStorage.getItem(key);
@@ -86,37 +86,6 @@ const AuthGuard = (function () {
         isRead: function (type, id) {
             const key = type === 'announcement' ? READ_ANNOUNCEMENTS_KEY : READ_PRIVATE_MSGS_KEY;
             return this.getReadIds(key).includes(String(id));
-        },
-
-        // 📣 瀏覽器原生通知 API 整合
-        requestNotificationPermission: async function () {
-            if (!("Notification" in window)) {
-                console.warn("此瀏覽器不支援桌面通知功能");
-                return false;
-            }
-            if (Notification.permission === "granted") {
-                return true;
-            }
-            if (Notification.permission !== "denied") {
-                const permission = await Notification.requestPermission();
-                return permission === "granted";
-            }
-            return false;
-        },
-
-        sendNotification: function (title, body, icon = "logo.png") {
-            if ("Notification" in window && Notification.permission === "granted") {
-                const notification = new Notification(title, {
-                    body: body,
-                    icon: icon,
-                    badge: icon
-                });
-
-                notification.onclick = function () {
-                    window.focus();
-                    this.close();
-                };
-            }
         }
     };
 })();
