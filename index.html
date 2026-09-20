@@ -761,7 +761,7 @@
                         <i class="fa-brands fa-google-drive" style="color:var(--green-color);"></i>
                         <div class="link-info"><h4>歷程雲端</h4><p>學習歷程檔案資料夾</p></div>
                     </div>
-                    <div class="link-card" onclick="window.open('https://gohsa.k12ea.gov.tw/', '_blank')">
+                    <div class="link-card" onclick="window.open('https://portal.k12.ntut.edu.tw/', '_blank')">
                         <i class="fa-solid fa-graduation-cap" style="color:var(--primary-color);"></i>
                         <div class="link-info"><h4>校務系統</h4><p>國教署智慧校務平台</p></div>
                     </div>
@@ -801,8 +801,8 @@
         </main>
     </div>
 
-    <!-- 💡 更新日誌 Modal 視窗 -->
-    <div class="modal-overlay" id="changelogModal" onclick="closeChangelogModal(event)">
+    <!-- 更新日誌 Modal 視窗 -->
+    <div class="modal-overlay" id="changelogModal" onclick="closeChangelogModal()">
         <div class="modal-container" onclick="event.stopPropagation()">
             <div class="modal-header">
                 <h3><i class="fa-solid fa-clock-rotate-left"></i> 系統更新日誌</h3>
@@ -818,9 +818,16 @@
                         <li>新增「點擊查看更新內容」對話盒功能。</li>
                         <li>優化系統載入與啟動動畫體驗。</li>
                         <li>改善手機端 UI 排版與側邊欄切換。</li>
-                        <li>加入訊息未讀提示功能。</li>
-                        <li>取消登入時效密鑰。</li>
-                        <li>加強admin.html安全性。</li>
+                    </ul>
+                </div>
+                <div class="changelog-item">
+                    <div>
+                        <span class="changelog-tag" style="background-color: #7f8c8d;">v 202609011000</span>
+                        <span class="changelog-date">2026-09-01</span>
+                    </div>
+                    <ul class="changelog-list">
+                        <li>整合課程網站資源搜尋功能。</li>
+                        <li>修復個人私訊未讀標記同步問題。</li>
                     </ul>
                 </div>
             </div>
@@ -935,21 +942,23 @@
             const sidebarBadge = document.getElementById(type === 'announcement' ? 'sidebarAnnBadge' : 'sidebarMsgBadge');
             const cardBadge = document.getElementById(type === 'announcement' ? 'cardAnnBadge' : 'cardMsgBadge');
 
-            if (unreadCount > 0) {
-                sidebarBadge.style.display = "inline-block";
-                sidebarBadge.textContent = unreadCount;
-                cardBadge.style.display = "inline-block";
-                if (type === 'announcement') cardBadge.textContent = `${unreadCount} 則新公告`;
-                else cardBadge.textContent = `${unreadCount} 則新訊息`;
-            } else {
-                sidebarBadge.style.display = "none";
-                cardBadge.style.display = "none";
+            if (sidebarBadge && cardBadge) {
+                if (unreadCount > 0) {
+                    sidebarBadge.style.display = "inline-block";
+                    sidebarBadge.textContent = unreadCount;
+                    cardBadge.style.display = "inline-block";
+                    if (type === 'announcement') cardBadge.textContent = `${unreadCount} 則新公告`;
+                    else cardBadge.textContent = `${unreadCount} 則新訊息`;
+                } else {
+                    sidebarBadge.style.display = "none";
+                    cardBadge.style.display = "none";
+                }
             }
         }
 
         // 撈取公開公告並進行未讀與已讀標記
         function loadAnnouncements() {
-            if (!gasUrl) return;
+            if (!gasUrl) return Promise.resolve();
             const container = document.getElementById('announcementContainer');
             return fetch(gasUrl, {
                 method: "POST",
@@ -960,7 +969,7 @@
             .then(res => res.json())
             .then(resData => {
                 if (resData.status === "success") {
-                    const list = resData.data;
+                    const list = resData.data || [];
                     if (list.length === 0) { container.innerHTML = '<div class="loading-text">目前尚無任何班級公告。</div>'; return; }
                     
                     let html = '<div class="msg-list">';
@@ -972,7 +981,6 @@
 
                         if (!isRead) {
                             unreadCount++;
-                            // 點開瀏覽該公告時自動標記已讀
                             AuthGuard.markAsRead('announcement', itemId);
                         }
 
@@ -994,12 +1002,15 @@
                     container.innerHTML = html + '</div>';
                     updateUnreadBadges('announcement', unreadCount);
                 } else { container.innerHTML = `<div class="loading-text" style="color:red;">載入失敗</div>`; }
-            }).catch(err => container.innerHTML = '<div class="loading-text">連線失敗</div>');
+            }).catch(err => {
+                console.error("載入公告錯誤:", err);
+                container.innerHTML = '<div class="loading-text" style="color:red;">連線失敗，無法取得班級公告。</div>';
+            });
         }
 
         // 撈取專屬私訊並進行未讀與已讀標記
         function loadPrivateMessages() {
-            if (!gasUrl || !currentUserName) return;
+            if (!gasUrl || !currentUserName) return Promise.resolve();
             const container = document.getElementById('privateMsgContainer');
 
             return fetch(gasUrl, {
@@ -1011,7 +1022,7 @@
             .then(res => res.json())
             .then(resData => {
                 if (resData.status === "success") {
-                    const list = resData.data;
+                    const list = resData.data || [];
                     if (list.length === 0) {
                         container.innerHTML = '<div class="loading-text"><i class="fa-solid fa-comment-slash"></i> 目前沒有給您的私人訊息。</div>';
                         updateUnreadBadges('privateMsg', 0);
@@ -1049,11 +1060,14 @@
                     updateUnreadBadges('privateMsg', unreadCount);
                 } else { container.innerHTML = `<div class="loading-text" style="color:red;">載入失敗：${resData.message}</div>`; }
             })
-            .catch(err => { container.innerHTML = '<div class="loading-text" style="color:red;">連線失敗。</div>'; });
+            .catch(err => {
+                console.error("載入私訊錯誤:", err);
+                container.innerHTML = '<div class="loading-text" style="color:red;">連線失敗，無法取得私人訊息。</div>';
+            });
         }
 
         function loadCourseResources() {
-            if (!gasUrl) return;
+            if (!gasUrl) return Promise.resolve();
             const container = document.getElementById('resourcesContainer');
 
             const searchInput = document.getElementById('resourceSearchInput');
@@ -1068,21 +1082,21 @@
             .then(res => res.json())
             .then(resData => {
                 if (resData.status === "success") {
-                    allResourcesData = resData.data;
+                    allResourcesData = resData.data || [];
                     renderResources(allResourcesData);
                 } else {
                     container.innerHTML = `<div class="loading-text" style="color:red;">資源載入失敗</div>`;
                 }
             })
             .catch(err => {
-                console.error(err);
+                console.error("載入課程資源錯誤:", err);
                 container.innerHTML = '<div class="loading-text" style="color:red;">連線失敗，無法取得資源。</div>';
             });
         }
 
         function renderResources(list) {
             const container = document.getElementById('resourcesContainer');
-            if (list.length === 0) {
+            if (!list || list.length === 0) {
                 container.innerHTML = '<div class="loading-text"><i class="fa-solid fa-folder-open"></i> 沒有找到符合關鍵字的課程資源。</div>';
                 return;
             }
@@ -1117,24 +1131,24 @@
             }
 
             const filtered = allResourcesData.filter(item => {
-                const categoryMatch = item.category.toLowerCase().includes(keyword);
-                const nameMatch = item.name.toLowerCase().includes(keyword);
-                const descMatch = item.description.toLowerCase().includes(keyword);
+                const categoryMatch = (item.category || "").toLowerCase().includes(keyword);
+                const nameMatch = (item.name || "").toLowerCase().includes(keyword);
+                const descMatch = (item.description || "").toLowerCase().includes(keyword);
                 return categoryMatch || nameMatch || descMatch;
             });
 
             renderResources(filtered);
         }
 
-        /* --- 💡 更新日誌 Modal 控制邏輯 --- */
+        /* --- 更新日誌 Modal 控制邏輯 --- */
         function openChangelogModal() {
-            const modal = document.getElementById('changelogModal');
-            if (modal) modal.classList.add('active');
+            const modalEl = document.getElementById('changelogModal');
+            if (modalEl) modalEl.classList.add('active');
         }
 
-        function closeChangelogModal(event) {
-            const modal = document.getElementById('changelogModal');
-            if (modal) modal.classList.remove('active');
+        function closeChangelogModal() {
+            const modalEl = document.getElementById('changelogModal');
+            if (modalEl) modalEl.classList.remove('active');
         }
 
         const sidebar = document.getElementById('sidebar');
