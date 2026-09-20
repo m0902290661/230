@@ -14,6 +14,7 @@
         :root {
             --sidebar-width: 260px;
             --primary-color: #3498db;
+            --primary-hover: #2980b9;
             --dark-color: #2c3e50;
             --light-bg: #f8f9fa;
             --text-color: #333;
@@ -202,7 +203,7 @@
         .sidebar-menu li a {
             display: flex;
             align-items: center;
-            gap: 15px;
+            justify-content: space-between;
             padding: 12px 25px;
             color: #ecf0f1;
             text-decoration: none;
@@ -216,6 +217,23 @@
             background-color: #34495e;
             color: var(--primary-color);
             border-left: 4px solid var(--primary-color);
+        }
+
+        .menu-link-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* 🔔 未讀數字徽章標籤 */
+        .badge {
+            background-color: var(--red-color);
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 2px 7px;
+            border-radius: 10px;
+            display: none;
         }
 
         .sidebar-footer {
@@ -329,6 +347,7 @@
             text-align: center;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
         }
 
         .feature-card:hover {
@@ -340,11 +359,19 @@
             font-size: 40px;
             margin-bottom: 15px;
         }
-        
-        .feature-card img {
-            height: 40px;
-            object-fit: contain;
-            margin-bottom: 15px;
+
+        /* 🔔 首頁卡片未讀提示點 */
+        .card-unread-dot {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background-color: var(--red-color);
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 12px;
+            display: none;
         }
 
         /* --- 公用元件 --- */
@@ -474,6 +501,7 @@
             padding: 20px;
             border-radius: 8px;
             border: 1px solid var(--border-color);
+            position: relative;
         }
 
         .msg-header {
@@ -496,16 +524,38 @@
             font-size: 18px;
             font-weight: bold;
             color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .msg-content {
             color: #555;
             line-height: 1.6;
             white-space: pre-line;
+            word-break: break-word;
+        }
+
+        .msg-content a {
+            color: var(--primary-color);
+            text-decoration: underline;
+        }
+
+        .msg-content a:hover {
+            color: var(--primary-hover, #2980b9);
         }
 
         .msg-item.private-style {
             border-left: 4px solid #9b59b6;
+        }
+
+        .new-tag {
+            background-color: var(--red-color);
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: normal;
         }
 
         /* --- 常用連結樣式 --- */
@@ -588,16 +638,48 @@
             <span class="sidebar-title">高二智班務系統</span>
         </div>
         <ul class="sidebar-menu" id="menuList">
-            <li class="active" data-target="homeSection"><a><i class="fa-solid fa-house"></i>系統首頁</a></li>
-            <li data-target="announcementSection"><a><i class="fa-solid fa-bullhorn"></i>班級公告欄</a></li>
-            <li data-target="privateMsgSection"><a><i class="fa-solid fa-envelope-open-text"></i>個人私人訊息</a></li>
-            <li data-target="resourcesSection"><a><i class="fa-solid fa-globe" style="color:#1abc9c;"></i>課程網站資源</a></li>
-            <li onclick="window.open('https://classvideos.huatingtea.com', '_blank')">
-                <a><i class="fa-solid fa-video" style="color: #e74c3c;"></i>課程影音</a>
+            <li class="active" data-target="homeSection">
+                <a>
+                    <div class="menu-link-content"><i class="fa-solid fa-house"></i>系統首頁</div>
+                </a>
             </li>
-            <li onclick="window.location.href='成績查詢.html'"><a><i class="fa-solid fa-square-poll-vertical"></i>成績查詢系統</a></li>
-            <li onclick="window.location.href='問題回報.html'"><a><i class="fa-solid fa-triangle-exclamation" style="color:#e67e22;"></i>問題與意見回報</a></li>
-            <li onclick="window.location.href='/小程式/ytmp3下載器.html'"><a><i class="fa-solid fa-download"></i>yt mp3下載器</a></li>
+            <li data-target="announcementSection">
+                <a>
+                    <div class="menu-link-content"><i class="fa-solid fa-bullhorn"></i>班級公告欄</div>
+                    <span class="badge" id="sidebarAnnBadge">0</span>
+                </a>
+            </li>
+            <li data-target="privateMsgSection">
+                <a>
+                    <div class="menu-link-content"><i class="fa-solid fa-envelope-open-text"></i>個人私人訊息</div>
+                    <span class="badge" id="sidebarMsgBadge">0</span>
+                </a>
+            </li>
+            <li data-target="resourcesSection">
+                <a>
+                    <div class="menu-link-content"><i class="fa-solid fa-globe" style="color:#1abc9c;"></i>課程網站資源</div>
+                </a>
+            </li>
+            <li onclick="window.open('https://classvideos.huatingtea.com', '_blank')">
+                <a>
+                    <div class="menu-link-content"><i class="fa-solid fa-video" style="color: #e74c3c;"></i>課程影音</div>
+                </a>
+            </li>
+            <li onclick="window.location.href='成績查詢.html'">
+                <a>
+                    <div class="menu-link-content"><i class="fa-solid fa-square-poll-vertical"></i>成績查詢系統</div>
+                </a>
+            </li>
+            <li onclick="window.location.href='問題回報.html'">
+                <a>
+                    <div class="menu-link-content"><i class="fa-solid fa-triangle-exclamation" style="color:#e67e22;"></i>問題與意見回報</div>
+                </a>
+            </li>
+            <li onclick="window.location.href='/小程式/ytmp3下載器.html'">
+                <a>
+                    <div class="menu-link-content"><i class="fa-solid fa-download"></i>yt mp3下載器</div>
+                </a>
+            </li>
         </ul>
         <div class="sidebar-footer">
             <button class="logout-btn" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i>登出系統</button>
@@ -620,7 +702,7 @@
                     <h1>嗨，<span id="nameDisplay" style="color: var(--primary-color);"></span>！</h1>
                     <p>歡迎來到高二智班務系統。請點選下方功能卡片或常用連結開始使用。</p>
                     <p>本系統由 許元洧 維護，若有問題請 <a style="color: black;text-decoration: underline;" href="問題回報.html">通報</a></p>
-                    <p>v 202607242013</p>
+                    <p>v 202609201300</p>
                 </div>
 
                 <div class="features-grid">
@@ -631,12 +713,14 @@
                     </div>
 
                     <div class="feature-card" onclick="switchPage('announcementSection')">
+                        <span class="card-unread-dot" id="cardAnnBadge">新公告</span>
                         <i class="fa-solid fa-bullhorn" style="color:var(--orange-color);"></i>
                         <h3>班級公告欄</h3>
                         <p>查看導師與班幹部發布的最新班級公開公告</p>
                     </div>
 
                     <div class="feature-card" onclick="switchPage('privateMsgSection')">
+                        <span class="card-unread-dot" id="cardMsgBadge">新訊息</span>
                         <i class="fa-solid fa-envelope-open-text" style="color:var(--primary-color);"></i>
                         <h3>個人私人訊息</h3>
                         <p>查看老師發送給您個人的私密重要通知</p>
@@ -711,8 +795,17 @@
     <script>
         let gasUrl = "";
         let currentUserName = "";
-        let allResourcesData = []; // 存放所有向 GAS 撈回來的課程資源原始陣列
+        let allResourcesData = [];
         const loaderStartTime = Date.now();
+
+        // 自動識別文本中的 URL 並轉換為開新分頁的 <a> 標籤
+        function linkify(text) {
+            if (!text) return "";
+            const urlRegex = /(https?:\/\/[^\s<]+)/g;
+            return text.replace(urlRegex, function(url) {
+                return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+            });
+        }
 
         function updateLoaderMessage(message) {
             const loaderMessage = document.getElementById('loaderMessage');
@@ -752,13 +845,16 @@
             document.getElementById("navNameDisplay").textContent = `${nickname} (${username})`;
             document.getElementById("avatarDisplay").textContent = nickname.charAt(0);
 
-            // 讀取外部 API 設定檔
+            // 請求瀏覽器原生推播通知權限
+            if (typeof AuthGuard.requestNotificationPermission === "function") {
+                AuthGuard.requestNotificationPermission();
+            }
+
             fetch('api.json')
                 .then(res => res.json())
                 .then(config => {
                     gasUrl = config.GAS_WEB_APP_URL;
                     updateLoaderMessage("正在載入公告、訊息與課程資源...");
-                    // 初始化時背景默默預載基本資料，避免切換時白屏過久
                     return Promise.race([
                         Promise.allSettled([
                             loadAnnouncements(),
@@ -775,7 +871,6 @@
                 .finally(hideAppLoader);
         };
 
-        // 側邊欄選單點擊事件監聽
         const menuItems = document.querySelectorAll('#menuList li');
         menuItems.forEach(item => {
             item.addEventListener('click', function () {
@@ -784,7 +879,6 @@
             });
         });
 
-        // 核心切換頁面機制
         function switchPage(targetSectionId) {
             if (!targetSectionId) return;
 
@@ -797,12 +891,30 @@
             const targetSection = document.getElementById(targetSectionId);
             if (targetSection) targetSection.classList.add('active');
 
-            // 切換時即時向後端或快取同步資料
             if (targetSectionId === 'announcementSection') loadAnnouncements();
             if (targetSectionId === 'privateMsgSection') loadPrivateMessages();
             if (targetSectionId === 'resourcesSection') loadCourseResources(); 
             
             if (window.innerWidth <= 768) toggleSidebar();
+        }
+
+        // 更新未讀徽章介面
+        function updateUnreadBadges(type, unreadCount) {
+            const sidebarBadge = document.getElementById(type === 'announcement' ? 'sidebarAnnBadge' : 'sidebarMsgBadge');
+            const cardBadge = document.getElementById(type === 'announcement' ? 'cardAnnBadge' : 'cardMsgBadge');
+
+            if (sidebarBadge && cardBadge) {
+                if (unreadCount > 0) {
+                    sidebarBadge.style.display = "inline-block";
+                    sidebarBadge.textContent = unreadCount;
+                    cardBadge.style.display = "inline-block";
+                    if (type === 'announcement') cardBadge.textContent = `${unreadCount} 則新公告`;
+                    else cardBadge.textContent = `${unreadCount} 則新訊息`;
+                } else {
+                    sidebarBadge.style.display = "none";
+                    cardBadge.style.display = "none";
+                }
+            }
         }
 
         // 撈取公開公告
@@ -820,21 +932,48 @@
                 if (resData.status === "success") {
                     const list = resData.data;
                     if (list.length === 0) { container.innerHTML = '<div class="loading-text">目前尚無任何班級公告。</div>'; return; }
+                    
                     let html = '<div class="msg-list">';
+                    let unreadCount = 0;
+                    let latestUnreadTitle = "";
+
                     list.forEach(item => {
+                        const itemId = item.id || (item.title + item.date);
+                        const isRead = typeof AuthGuard.isRead === "function" ? AuthGuard.isRead('announcement', itemId) : true;
+
+                        if (!isRead) {
+                            unreadCount++;
+                            if (!latestUnreadTitle) latestUnreadTitle = item.title;
+                            if (typeof AuthGuard.markAsRead === "function") {
+                                AuthGuard.markAsRead('announcement', itemId);
+                            }
+                        }
+
                         html += `
                     <div class="msg-item">
                         <div class="msg-header">
-                            <div class="msg-title">${item.title}</div>
+                            <div class="msg-title">
+                                ${item.title}
+                                ${!isRead ? '<span class="new-tag">NEW</span>' : ''}
+                            </div>
                             <div class="msg-meta">
                                 <span><i class="fa-solid fa-calendar"></i> ${item.date}</span>
                                 <span><i class="fa-solid fa-user"></i> ${item.author}</span>
                             </div>
                         </div>
-                        <div class="msg-content">${item.content}</div>
+                        <div class="msg-content">${linkify(item.content)}</div>
                     </div>`;
                     });
                     container.innerHTML = html + '</div>';
+                    updateUnreadBadges('announcement', unreadCount);
+
+                    // 🔔 若有未讀公告，發送瀏覽器推播通知
+                    if (unreadCount > 0 && typeof AuthGuard.sendNotification === "function") {
+                        AuthGuard.sendNotification(
+                            "📢 高二智班務系統 - 最新公告",
+                            `您有 ${unreadCount} 則未讀公告：${latestUnreadTitle}`
+                        );
+                    }
                 } else { container.innerHTML = `<div class="loading-text" style="color:red;">載入失敗</div>`; }
             }).catch(err => container.innerHTML = '<div class="loading-text">連線失敗</div>');
         }
@@ -856,23 +995,51 @@
                     const list = resData.data;
                     if (list.length === 0) {
                         container.innerHTML = '<div class="loading-text"><i class="fa-solid fa-comment-slash"></i> 目前沒有給您的私人訊息。</div>';
+                        updateUnreadBadges('privateMsg', 0);
                         return;
                     }
+
                     let html = '<div class="msg-list">';
+                    let unreadCount = 0;
+                    let latestUnreadTitle = "";
+
                     list.forEach(item => {
+                        const itemId = item.id || (item.title + item.date);
+                        const isRead = typeof AuthGuard.isRead === "function" ? AuthGuard.isRead('privateMsg', itemId) : true;
+
+                        if (!isRead) {
+                            unreadCount++;
+                            if (!latestUnreadTitle) latestUnreadTitle = item.title;
+                            if (typeof AuthGuard.markAsRead === "function") {
+                                AuthGuard.markAsRead('privateMsg', itemId);
+                            }
+                        }
+
                         html += `
                     <div class="msg-item private-style">
                         <div class="msg-header">
-                            <div class="msg-title" style="color:#8e44ad;"><i class="fa-solid fa-user-lock"></i> ${item.title}</div>
+                            <div class="msg-title" style="color:#8e44ad;">
+                                <i class="fa-solid fa-user-lock"></i> ${item.title}
+                                ${!isRead ? '<span class="new-tag">NEW</span>' : ''}
+                            </div>
                             <div class="msg-meta">
                                 <span><i class="fa-solid fa-calendar"></i> ${item.date}</span>
                                 <span><i class="fa-solid fa-paper-plane"></i> 來自：${item.sender}</span>
                             </div>
                         </div>
-                        <div class="msg-content">${item.content}</div>
+                        <div class="msg-content">${linkify(item.content)}</div>
                     </div>`;
                     });
                     container.innerHTML = html + '</div>';
+                    updateUnreadBadges('privateMsg', unreadCount);
+
+                    // 🔔 若有未讀私人訊息，發送瀏覽器推播通知
+                    if (unreadCount > 0 && typeof AuthGuard.sendNotification === "function") {
+                        AuthGuard.sendNotification(
+                            "✉️ 高二智班務系統 - 個人訊息通知",
+                            `您有 ${unreadCount} 則未讀個人訊息：${latestUnreadTitle}`
+                        );
+                    }
                 } else { container.innerHTML = `<div class="loading-text" style="color:red;">載入失敗：${resData.message}</div>`; }
             })
             .catch(err => { container.innerHTML = '<div class="loading-text" style="color:red;">連線失敗。</div>'; });
@@ -883,7 +1050,6 @@
             if (!gasUrl) return;
             const container = document.getElementById('resourcesContainer');
 
-            // 每次重新切換或點進此分頁，將上一次的搜尋欄內容重置
             const searchInput = document.getElementById('resourceSearchInput');
             if(searchInput) searchInput.value = "";
 
@@ -896,8 +1062,8 @@
             .then(res => res.json())
             .then(resData => {
                 if (resData.status === "success") {
-                    allResourcesData = resData.data; // 儲存至全域變數，供搜尋功能使用
-                    renderResources(allResourcesData); // 渲染生成 HTML 卡片
+                    allResourcesData = resData.data;
+                    renderResources(allResourcesData);
                 } else {
                     container.innerHTML = `<div class="loading-text" style="color:red;">資源載入失敗</div>`;
                 }
@@ -908,10 +1074,8 @@
             });
         }
 
-        // 純粹將資料陣列輸出轉換為網頁 DOM 的功能
         function renderResources(list) {
             const container = document.getElementById('resourcesContainer');
-            
             if (list.length === 0) {
                 container.innerHTML = '<div class="loading-text"><i class="fa-solid fa-folder-open"></i> 沒有找到符合關鍵字的課程資源。</div>';
                 return;
@@ -939,28 +1103,23 @@
             container.innerHTML = html + '</div>';
         }
 
-        // 前端即時過濾關鍵字
         function filterResources() {
             const keyword = document.getElementById('resourceSearchInput').value.toLowerCase().trim();
-            
             if (keyword === "") {
                 renderResources(allResourcesData);
                 return;
             }
 
-            // 支援科目、標題、簡介描述進行三合一全方位模糊比對
             const filtered = allResourcesData.filter(item => {
                 const categoryMatch = item.category.toLowerCase().includes(keyword);
                 const nameMatch = item.name.toLowerCase().includes(keyword);
                 const descMatch = item.description.toLowerCase().includes(keyword);
-                
                 return categoryMatch || nameMatch || descMatch;
             });
 
             renderResources(filtered);
         }
 
-        // RWD 行動裝置側邊選單切換開關
         const sidebar = document.getElementById('sidebar');
         const menuToggle = document.getElementById('menuToggle');
         const overlay = document.getElementById('sidebarOverlay');
@@ -971,7 +1130,6 @@
         menuToggle.addEventListener('click', toggleSidebar);
         overlay.addEventListener('click', toggleSidebar);
 
-        // 登出流程
         document.getElementById("logoutBtn").addEventListener("click", function () {
             AuthGuard.clearSession();
             alert("您已成功登出。");
